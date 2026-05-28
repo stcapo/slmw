@@ -1902,6 +1902,58 @@ DP 兼容：
   结论：
 ```
 
+### 15.30 2026-05-28 最小 LA PWM 固件重写记录
+
+```text
+测试目标：
+  删除当前任务无关代码，用第一性原理验证 P24/P25 两路波形是否独立、是否符合预期
+用户反馈：
+  发送 Direct PWM: WW=10%, CW=90% 时，LA 看到 CH0 和 CH1 都是 90% / 200Hz
+  p24hi 日志返回/表现与 P25 HIGH 对不上
+  当前问题已明确指向固件命令语义、引脚映射或硬件 PWM 路径混乱
+处理方式：
+  重写 firmware/t5_tuya_cct_app/t5_tuya_cct_app.ino
+  删除 TuyaIoT、DP、App、云端、secrets、硬件 PWM、MOSFET 业务逻辑
+  只保留：
+    串口命令解析
+    P24/P25 普通数字输出
+    P24/P25 软件 PWM，200Hz
+    当前接线约定 WW=P25、CW=P24
+重要约定：
+  后续不再把当前 P24/P25 互换状态改回
+  LA 记录始终按物理引脚：
+    CH0 = P24
+    CH1 = P25
+  当前灯带语义：
+    WW 暖白 = P25
+    CW 冷白 = P24
+串口命令：
+  help             显示命令
+  state            打印当前状态
+  stop             P24=0%、P25=0%
+  p24hi            P24=HIGH、P25=LOW
+  p24lo            P24=LOW、P25=LOW
+  p25hi            P24=LOW、P25=HIGH
+  p25lo            P24=LOW、P25=LOW
+  pwm              恢复 PWM
+  mix <p24> <p25>  按物理引脚直接设置 PWM 占空比
+  ww <0-100>       暖白专用：P25=duty、P24=0
+  cw <0-100>       冷白专用：P24=duty、P25=0
+  wwcw <ww> <cw>   按灯带通道设置：WW=P25、CW=P24
+验收标准：
+  p24hi：CH0 常高、CH1 常低
+  p25hi：CH0 常低、CH1 常高
+  mix 10 90：CH0/P24=10%，CH1/P25=90%
+  mix 90 10：CH0/P24=90%，CH1/P25=10%
+  wwcw 10 90：WW/P25=10%，CW/P24=90%，即 CH0=90%、CH1=10%
+编译结果：
+  BUILD SUCCESS
+当前结论：
+  该固件用于排除所有云端/App/硬件 PWM 干扰
+  如果该固件下两路波形仍不独立，再查接线/LA 通道/板子引脚本身
+  如果该固件下两路波形正确，原问题来自旧固件硬件 PWM/命令映射复杂度
+```
+
 ## 16. 支线：涂鸦 WiFi+BT 5-in-1 成品灯带控制器测试
 
 > 日期：2026-05-26  
