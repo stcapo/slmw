@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>智能照明模块工程指南 · 从0到Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --bg:       #0d1117;
+  --bg2:      #161b22;
+  --bg3:      #21262d;
+  --border:   #30363d;
+  --border2:  #484f58;
+  --t1:       #e6edf3;
+  --t2:       #8b949e;
+  --t3:       #6e7681;
+  --amber:    #f59e0b;
+  --amber2:   #fbbf24;
+  --cyan:     #22d3ee;
+  --cyan2:    #67e8f9;
+  --green:    #3fb950;
+  --green2:   #56d364;
+  --red:      #f85149;
+  --red2:     #ff7b72;
+  --purple:   #bc8cff;
+  --blue:     #58a6ff;
+  --mono:     'IBM Plex Mono', 'Courier New', monospace;
+  --sans:     'Noto Sans SC', system-ui, sans-serif;
+}
+
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--t1);
+  font-size: 15px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+strong { color: var(--t1); font-weight: 600; }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ===== LAYOUT ===== */
+.container { max-width: 1100px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* ===== HERO ===== */
+.hero {
+  background: linear-gradient(160deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 60px 20px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(34,211,238,.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--t1) 0%, var(--cyan2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero p {
+  color: var(--t2);
+  font-size: 1rem;
+  max-width: 640px;
+  margin: 0 auto 24px;
+}
+.badge-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+/* ===== NAV ===== */
+.toc-bar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,17,23,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.toc-bar::-webkit-scrollbar { height: 3px; }
+.toc-inner { display: inline-flex; gap: 0; max-width: 1100px; margin: 0 auto; }
+.toc-link {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--t3);
+  padding: 12px 14px;
+  border-bottom: 2px solid transparent;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.toc-link:hover { color: var(--cyan); border-bottom-color: var(--cyan); text-decoration: none; }
+
+/* ===== SECTIONS ===== */
+.section { margin-top: 56px; }
+.section-anchor { scroll-margin-top: 56px; }
+.section-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 8px;
+}
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--t1);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  margin-left: 12px;
+}
+.section-sub { color: var(--t2); font-size: .9rem; margin-bottom: 24px; }
+
+/* ===== CARDS ===== */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 22px;
+  margin-bottom: 14px;
+}
+.card-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 12px;
+  color: var(--t1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card + .card { margin-top: 0; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+@media(max-width:720px) { .grid2,.grid3 { grid-template-columns: 1fr; } }
+
+/* ===== ASCII DIAGRAM ===== */
+.ascii {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--cyan2);
+  background: #0a0e14;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 22px;
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+.ascii .c-amber { color: var(--amber2); }
+.ascii .c-green { color: var(--green2); }
+.ascii .c-red { color: var(--red2); }
+.ascii .c-purple { color: var(--purple); }
+.ascii .c-gray { color: var(--t3); }
+
+/* ===== CALLOUTS ===== */
+.callout {
+  border-radius: 7px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-size: .9rem;
+  border-left: 3px solid;
+}
+.callout-warn  { background: rgba(245,158,11,.08); border-color: var(--amber); color: var(--amber2); }
+.callout-ok    { background: rgba(63,185,80,.08);  border-color: var(--green); color: var(--green2); }
+.callout-info  { background: rgba(34,211,238,.08); border-color: var(--cyan);  color: var(--cyan2); }
+.callout-error { background: rgba(248,81,73,.08);  border-color: var(--red);   color: var(--red2); }
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  vertical-align: middle;
+}
+.badge-cyan   { background: rgba(34,211,238,.15); color: var(--cyan2); border: 1px solid rgba(34,211,238,.3); }
+.badge-amber  { background: rgba(245,158,11,.15); color: var(--amber2); border: 1px solid rgba(245,158,11,.3); }
+.badge-green  { background: rgba(63,185,80,.15);  color: var(--green2); border: 1px solid rgba(63,185,80,.3); }
+.badge-red    { background: rgba(248,81,73,.15);  color: var(--red2);   border: 1px solid rgba(248,81,73,.3); }
+.badge-purple { background: rgba(188,140,255,.15);color: var(--purple); border: 1px solid rgba(188,140,255,.3); }
+.badge-blue   { background: rgba(88,166,255,.15); color: var(--blue);   border: 1px solid rgba(88,166,255,.3); }
+
+/* ===== TABLES ===== */
+.table-wrap { overflow-x: auto; margin: 10px 0; }
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+thead tr { background: var(--bg3); }
+th {
+  text-align: left;
+  padding: 9px 13px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .5px;
+  color: var(--t2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td { padding: 9px 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+td code, th code { font-family: var(--mono); background: var(--bg3); padding: 1px 5px; border-radius: 3px; font-size: .85em; }
+
+/* ===== INLINE CODE ===== */
+code {
+  font-family: var(--mono);
+  font-size: .87em;
+  background: var(--bg3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--cyan2);
+}
+
+/* ===== Q&A BLOCKS ===== */
+.qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:640px) { .qa-grid { grid-template-columns: 1fr; } }
+.qa-item {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 18px;
+}
+.qa-q {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--amber);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.qa-a { font-size: .9rem; color: var(--t1); }
+
+/* ===== FOUR-POINT BLOCKS ===== */
+.four-point {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+@media(max-width:600px) { .four-point { grid-template-columns: 1fr; } }
+.fp {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 12px 14px;
+  font-size: .88rem;
+}
+.fp-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+/* ===== CHECKLIST ===== */
+.checklist { list-style: none; }
+.checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: .92rem;
+}
+.checklist li:last-child { border-bottom: none; }
+.check-box {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border2);
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.check-box.checked {
+  background: var(--green);
+  border-color: var(--green);
+}
+.check-box.checked::after { content: '✓'; display: block; text-align: center; color: #fff; font-size: 12px; line-height: 14px; }
+
+/* ===== PITFALL ITEMS ===== */
+.pitfall {
+  display: flex;
+  gap: 14px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  border-radius: 0 8px 8px 0;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.pitfall-num {
+  font-family: var(--mono);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--red);
+  flex-shrink: 0;
+  width: 28px;
+}
+.pitfall-content h5 { color: var(--red2); font-size: .95rem; margin-bottom: 4px; }
+.pitfall-content p { color: var(--t2); font-size: .88rem; }
+
+/* ===== ROUTE CARD ===== */
+.route-card {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.route-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.route-a .route-header { background: linear-gradient(135deg, rgba(34,211,238,.12), rgba(34,211,238,.04)); border-bottom: 1px solid rgba(34,211,238,.2); }
+.route-b .route-header { background: linear-gradient(135deg, rgba(188,140,255,.12), rgba(188,140,255,.04)); border-bottom: 1px solid rgba(188,140,255,.2); }
+.route-body { background: var(--bg2); padding: 16px 20px; }
+
+/* ===== PHASE TIMELINE ===== */
+.phases { position: relative; padding-left: 32px; }
+.phases::before {
+  content: '';
+  position: absolute; left: 10px; top: 6px; bottom: 6px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--amber), var(--cyan), var(--green));
+  border-radius: 2px;
+}
+.phase {
+  position: relative;
+  margin-bottom: 28px;
+}
+.phase::before {
+  content: '';
+  position: absolute;
+  left: -26px; top: 6px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  background: var(--amber);
+  box-shadow: 0 0 0 3px rgba(245,158,11,.2);
+}
+.phase:nth-child(2)::before { background: var(--cyan); box-shadow: 0 0 0 3px rgba(34,211,238,.2); }
+.phase:nth-child(3)::before { background: var(--green); box-shadow: 0 0 0 3px rgba(63,185,80,.2); }
+.phase:nth-child(4)::before { background: var(--purple); box-shadow: 0 0 0 3px rgba(188,140,255,.2); }
+.phase h4 { font-size: 1rem; margin-bottom: 8px; }
+.phase ul { color: var(--t2); font-size: .9rem; padding-left: 18px; }
+.phase ul li { margin-bottom: 4px; }
+
+/* ===== ARCH DIAGRAM BLOCKS ===== */
+.arch { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 16px 0; }
+.arch-box {
+  border: 1px solid;
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-size: .82rem;
+  text-align: center;
+  font-family: var(--mono);
+  min-width: 90px;
+}
+.arch-arrow { color: var(--t3); font-size: 1.2rem; }
+.a1 { border-color: var(--red);   color: var(--red2);   background: rgba(248,81,73,.07); }
+.a2 { border-color: var(--amber); color: var(--amber2); background: rgba(245,158,11,.07); }
+.a3 { border-color: var(--cyan);  color: var(--cyan2);  background: rgba(34,211,238,.07); }
+.a4 { border-color: var(--green); color: var(--green2); background: rgba(63,185,80,.07); }
+.a5 { border-color: var(--purple);color: var(--purple); background: rgba(188,140,255,.07); }
+
+/* ===== FADE-IN ===== */
+.fade-in { opacity: 0; transform: translateY(18px); transition: opacity .5s ease, transform .5s ease; }
+.fade-in.visible { opacity: 1; transform: none; }
+
+/* ===== FOOTER ===== */
+footer {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--t3);
+  font-family: var(--mono);
+  font-size: .8rem;
+  border-top: 1px solid var(--border);
+}
+footer span { color: var(--amber); }
+
+/* ===== UTILITY ===== */
+ul.plain { list-style: none; }
+ul.plain li { padding: 4px 0; color: var(--t2); font-size: .9rem; }
+ul.plain li::before { content: '→ '; color: var(--cyan); font-family: var(--mono); }
+ul { padding-left: 20px; }
+ul li { color: var(--t2); margin-bottom: 4px; font-size: .92rem; }
+p { color: var(--t2); font-size: .93rem; margin-bottom: 10px; }
+h3 { font-size: 1.05rem; font-weight: 600; color: var(--t1); margin-bottom: 10px; }
+h4 { font-size: .95rem; font-weight: 600; color: var(--t1); margin-bottom: 8px; }
+.mt8 { margin-top: 8px; }
+.mt16 { margin-top: 16px; }
+.mono { font-family: var(--mono); }
+.text-amber { color: var(--amber2); }
+.text-cyan  { color: var(--cyan2); }
+.text-green { color: var(--green2); }
+.text-red   { color: var(--red2); }
+.text-purple{ color: var(--purple); }
+</style>
+</head>
+<body>
+
+<!-- ========== HERO ========== -->
+<div class="hero">
+  <div class="hero-eyebrow">SMART LIGHTING MODULE · ENGINEERING GUIDE</div>
+  <h1>智能照明模块方案<br>从 0 到 Demo 工程指南</h1>
+  <p>基于涂鸦智能模组 · 覆盖电源、功率级、通信、PCB 全链路 · 新手可执行</p>
+  <p style="margin-top:10px;color:var(--green2);font-size:.92rem">2026-05-27 状态更新：第一阶段主开发板已确定为 <strong>Tuya T5AI-Core</strong>，WB3S/T3-3S/WBR3S 不再作为首轮主路径。物料已到货（T5AI-Core、YYNMOS-4、灿带、电源等），小工具部分待补购。进入上电验证阶段，按 Phase 1 实施手册步骤执行。</p>
+  <div class="badge-row">
+    <span class="badge badge-cyan">WiFi 直连</span>
+    <span class="badge badge-purple">Zigbee 组网</span>
+    <span class="badge badge-amber">AC→DC 电源</span>
+    <span class="badge badge-green">PWM 调光</span>
+    <span class="badge badge-red">安全底线</span>
+  </div>
+</div>
+
+<!-- ========== TOC NAV ========== -->
+<nav class="toc-bar">
+  <div class="toc-inner">
+    <a class="toc-link" href="#q0">Q0 框架图</a>
+    <a class="toc-link" href="#q1">Q1 路线图</a>
+    <a class="toc-link" href="#q2">Q2 LED驱动</a>
+    <a class="toc-link" href="#q3">Q3 MOSFET</a>
+    <a class="toc-link" href="#q4">Q4 电源</a>
+    <a class="toc-link" href="#q5">Q5 保护</a>
+    <a class="toc-link" href="#q6">Q6 WiFi/Zigbee</a>
+    <a class="toc-link" href="#q7">Q7 模组/PCB</a>
+    <a class="toc-link" href="#q8">Q8 器件选型</a>
+    <a class="toc-link" href="#bom">BOM清单</a>
+    <a class="toc-link" href="#phases">实施方案</a>
+    <a class="toc-link" href="#checklist">验收清单</a>
+    <a class="toc-link" href="#pitfalls">十大坑</a>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- ========== Q0 框架图 ========== -->
+<div id="q0" class="section section-anchor fade-in">
+  <div class="section-label">Q0 · SYSTEM ARCHITECTURE</div>
+  <div class="section-title">总体框架图</div>
+  <div class="section-sub">市电到 LED 的完整信号链路 + 控制路径</div>
+
+  <div class="ascii">
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      智能照明模块 · 系统框架图                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+ 【强电侧 — 务必隔离，禁止徒手搭建】
+ ┌──────────┐   保险/MOV/NTC    ┌─────────────────┐
+ │  AC 市电  │ ─────────────── ▶│  AC-DC 离线电源  │  (成品开关电源模块)
+ │ 220V/50Hz│   最低安全底线    │  12V / 24V 输出  │
+ └──────────┘                   └────────┬────────┘
+                                          │ 低压 DC 母线 (安全电压)
+                                          │
+                    ┌─────────────────────┼──────────────────────┐
+                    │                     │                      │
+             ┌──────┴──────┐      ┌───────┴──────┐      ┌───────┴──────┐
+             │  电源转换级  │      │  功率驱动级   │      │  智能通信模组 │
+             │ Buck / LDO  │      │  N-MOSFET ×2 │      │T5AI-Core   │
+             │  → 3.3V     │      │  (冷路+暖路)  │      │  WiFi/BLE   │
+             └──────┬──────┘      └───────┬──────┘      └───────┬──────┘
+                    │                     │                      │
+                    └──── 3.3V VCC ──────▶│◀── PWM/GPIO 控制 ───┘
+                                          │
+                                          ▼
+                                   ┌──────────────┐
+                                   │  LED 负载     │
+                                   │ 冷白 + 暖白   │
+                                   │ (CCT 调色温)  │
+                                   └──────────────┘
+
+ 【控制信号路径】
+ App / 云端  ──WiFi/Zigbee──▶ 模组(3.3V) ──GPIO/PWM──▶ MOSFET栅极 ──▶ LED电流通断
+
+ 【保护层级】
+ AC侧: 保险丝 + MOV + NTC(浪涌限流)
+ DC侧: TVS + 防反接二极管 + PPTC自恢复保险丝
+  </div>
+
+  <div class="callout callout-error">⚡ 安全红线：AC 侧（220V 部分）必须使用成品认证电源模块，绝对不允许在面包板上徒手搭建 AC 电路。所有调试、验证操作都在低压 DC 母线之后进行。</div>
+</div>
+
+
+<!-- ========== Q1 路线图 ========== -->
+<div id="q1" class="section section-anchor fade-in">
+  <div class="section-label">Q1 · MVP ROADMAP</div>
+  <div class="section-title">两条 MVP 路线 + 1-2 周速成计划</div>
+  <div class="section-sub">先选 Route A 跑通，再视需求扩展 Route B</div>
+
+  <div class="grid2">
+    <div class="route-card route-a">
+      <div class="route-header">
+        <span style="font-size:1.5rem">📶</span>
+        <div>
+          <div style="font-weight:700;color:var(--cyan2);font-size:1rem">Route A · WiFi 优先</div>
+          <div style="color:var(--t3);font-size:.82rem;font-family:var(--mono)">推荐新手 · 最快跑通</div>
+        </div>
+        <span class="badge badge-green" style="margin-left:auto">推荐</span>
+      </div>
+      <div class="route-body">
+        <ul class="plain">
+          <li>无需网关，手机直连</li>
+          <li>T5AI-Core 开发板 + TuyaOpen SDK</li>
+          <li>配网：SmartConfig / EZ 模式</li>
+          <li>目标：7 天内 App 控制开关灯</li>
+          <li>验证整条功率链路后再做 Zigbee</li>
+        </ul>
+        <div class="callout callout-ok" style="margin-top:12px">✅ 工程价值：WiFi 版跑通 = 电源、MOSFET、固件框架全验证完毕</div>
+      </div>
+    </div>
+
+    <div class="route-card route-b">
+      <div class="route-header">
+        <span style="font-size:1.5rem">🏠</span>
+        <div>
+          <div style="font-weight:700;color:var(--purple);font-size:1rem">Route B · Zigbee 组网</div>
+          <div style="color:var(--t3);font-size:.82rem;font-family:var(--mono)">需要网关 · 全屋智能</div>
+        </div>
+        <span class="badge badge-purple" style="margin-left:auto">后期</span>
+      </div>
+      <div class="route-body">
+        <ul class="plain">
+          <li>ZS3L 模组（与 WB3S 同引脚）</li>
+          <li>需要 Zigbee 网关（TYGWZ-01）</li>
+          <li>支持 Mesh 组网 + 断网本地控制</li>
+          <li>PCB 设计兼容两种模组，不用改板</li>
+          <li>固件切换，其余电路完全相同</li>
+        </ul>
+        <div class="callout callout-info" style="margin-top:12px">💡 Route A 跑通后切 Zigbee 只需换模组，1 天内搞定</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 每天计划 -->
+  <div class="card mt16">
+    <div class="card-title">📅 1-2 周执行计划（Route A · WiFi 优先）</div>
+    <div class="phases">
+      <div class="phase">
+        <h4>Day 1-2 · 采购 + 环境搭建 <span class="badge badge-amber">产出：材料到手</span></h4>
+        <ul>
+          <li>物料已到货：T5AI-Core×1、YYNMOS-4/NMOS-4×2、12V 单色/双色温灿带、12V 2A 电源适配器；待补购：剥线陡、剪鑡、绝缘胶带、热缩管、镜子</li>
+          <li>注册涂鸦 IoT 平台，创建产品（品类选"照明→灯"，配置 DP：开关/亮度/色温）</li>
+          <li>下载涂鸦 SDK + 烧录工具（ChipTool / Tuya Wind IDE）</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <h4>Day 3-4 · 电源链路验证 <span class="badge badge-cyan">产出：3.3V 稳定输出</span></h4>
+        <ul>
+          <li>12V 开关电源 → AMS1117-3.3 → 万用表量输出，确认 3.3V ±0.1V</li>
+          <li>给 T5AI-Core 接 Type-C 单独上电，串口观察启动 log</li>
+          <li>验收：T5AI-Core 上电不重启，串口输出正常 boot 信息</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <h4>Day 5-6 · 功率级 + 配网 <span class="badge badge-green">产出：App 能开关灯</span></h4>
+        <ul>
+          <li>接线 YYNMOS-4：T5 PWM→模块PWM口，T5 GND→模块GND；12V 电源输入模块；输出接光带</li>
+          <li>串口烧录涂鸦固件，手机打开"涂鸦智能"App，选 EZ 配网</li>
+          <li>验收：App 点开关 → LED 响应，延迟 &lt;500ms</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <h4>Day 7-14 · PWM 调光 + 稳定性 <span class="badge badge-purple">产出：可演示 Demo</span></h4>
+        <ul>
+          <li>配置双 GPIO 为 PWM 输出（冷路/暖路各一路），频率 2kHz+</li>
+          <li>App 滑动亮度条，用手机摄像头观察 LED 是否闪烁</li>
+          <li>断电重上电测试恢复状态（涂鸦 SDK 自带断电记忆）</li>
+          <li>连续运行 24h，手摸 LDO/MOSFET 温度（&lt;60°C 安全）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 验收标准 -->
+  <div class="card">
+    <div class="card-title">🎯 "跑通"验收标准（MVP）</div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>验收项</th><th>指标</th><th>测试方法</th></tr></thead>
+      <tbody>
+        <tr><td>上电启动</td><td>3 秒内完成 boot，不反复重启</td><td>看串口 log</td></tr>
+        <tr><td>配网成功</td><td>首次 EZ 配网 &lt;60 秒</td><td>App 显示"在线"</td></tr>
+        <tr><td>开关响应</td><td>App 点击 → LED 变化 &lt;500ms</td><td>秒表计时</td></tr>
+        <tr><td>断电恢复</td><td>断电重上电，恢复断电前状态</td><td>5 次断电测试</td></tr>
+        <tr><td>PWM 调光</td><td>0%~100% 平滑无肉眼闪烁</td><td>手机摄像头慢速录像</td></tr>
+        <tr><td>色温调节</td><td>冷暖混光连续可调</td><td>App 滑动色温条</td></tr>
+        <tr><td>长时稳定</td><td>连续运行 1h 不断连、不死机</td><td>计时观察</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========== Q2 LED 驱动 ========== -->
+<div id="q2" class="section section-anchor fade-in">
+  <div class="section-label">Q2 · LED LOAD & DRIVER</div>
+  <div class="section-title">LED 负载与驱动：恒流 vs 恒压</div>
+  <div class="section-sub">为什么 3.3V GPIO 点不亮灯串，以及如何界定对客户的接口</div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title text-amber">⚡ 恒压驱动（CV）</div>
+      <p><strong>是什么：</strong>输出固定电压（12V/24V），电流随负载变化。</p>
+      <p><strong>适用：</strong>12V 灯带（内置限流电阻）、并联 LED 模组</p>
+      <p><strong>特点：</strong>简单便宜，但 LED 电流受温度影响，不够精确</p>
+      <div class="callout callout-info">💡 大多数家用 LED 灯带用的都是恒压 12V/24V 驱动</div>
+    </div>
+    <div class="card">
+      <div class="card-title text-cyan">⚡ 恒流驱动（CC）</div>
+      <p><strong>是什么：</strong>输出固定电流（如 350mA/700mA），电压随串联颗数变化。</p>
+      <p><strong>适用：</strong>高功率 LED 灯珠串（筒灯、路灯等）</p>
+      <p><strong>特点：</strong>亮度稳定，寿命更长，但成本较高</p>
+      <div class="callout callout-info">💡 专业照明产品通常用恒流驱动，LED 亮度不随温度漂移</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔢 典型例子：12 颗白光 LED 串联</div>
+    <div class="ascii">
+  单颗白光 LED：正向电压 Vf ≈ 3.0V，工作电流 If ≈ 20mA
+
+  12 颗串联：
+  ┌───[LED]──[LED]──...──[LED]──┐  (×12颗)
+  │   Vf_total = 3.0V × 12 = 36V │
+  └─────────────────────────────┘
+
+  → 需要 36V 以上的驱动才能点亮这串 LED
+  → 3.3V GPIO 输出 → 完全无法点亮（差了 10 倍以上）
+
+  正确做法：
+  恒压驱动 36V → MOSFET 开关 → LED 串
+  或
+  恒流驱动（350mA@36V）→ LED 串  （更专业）
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎯 模块方案：如何定义给客户的接口</div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>接口方案</th><th>你提供什么</th><th>客户做什么</th><th>适用场景</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>方案A：PWM控制口</strong></td>
+          <td>模组 + MOSFET 驱动板，提供 DC输入 + PWM调光信号</td>
+          <td>客户自备恒压/恒流驱动，你的板子串在中间</td>
+          <td>✅ MVP 推荐，最灵活</td>
+        </tr>
+        <tr>
+          <td><strong>方案B：恒压输出</strong></td>
+          <td>模组 + MOSFET + 恒压输出（12V/24V），App 控制通断/调光</td>
+          <td>客户直接接 LED 灯带</td>
+          <td>适合灯带产品</td>
+        </tr>
+        <tr>
+          <td><strong>方案C：集成恒流驱动</strong></td>
+          <td>模组 + 恒流驱动芯片（如 PT4115/BP3316）</td>
+          <td>直接接 LED 灯珠串</td>
+          <td>一体化高端方案</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout callout-ok">✅ MVP 阶段选方案A：你的智能中间层只做"开关/调光控制"，不管驱动。客户灯具里已有驱动，你的板子插在驱动和 LED 之间。</div>
+  </div>
+</div>
+
+
+<!-- ========== Q3 MOSFET ========== -->
+<div id="q3" class="section section-anchor fade-in">
+  <div class="section-label">Q3 · PWM → MOSFET → LED</div>
+  <div class="section-title">功率开关链路：每一环干什么</div>
+  <div class="section-sub">N-MOS 工作原理 + 最小可用电路拓扑</div>
+
+  <div class="card">
+    <div class="card-title">🔌 N-MOSFET 三极解释</div>
+    <div class="ascii">
+  N-MOSFET（如 AO3400 / SI2302）：
+
+       漏极 D ──── 接 LED 负极（高电位侧负载）
+            │
+     G ─────┤  ← 栅极：控制极，3.3V 可完全导通
+            │
+       源极 S ──── 接 GND
+
+  工作逻辑（低边开关）：
+  ┌─────────────────────────────────────────────┐
+  │ GPIO 输出 HIGH(3.3V) → Vgs > Vth → 导通    │
+  │ LED 电流路径：12V → LED → D-S → GND ✔      │
+  │                                             │
+  │ GPIO 输出 LOW(0V)   → Vgs < Vth → 截止     │
+  │ LED 熄灭 ✔                                  │
+  └─────────────────────────────────────────────┘
+
+  关键参数：
+  • Vgs(th) ≈ 0.7~1.5V  → 3.3V GPIO 完全能驱动
+  • Rds(on) ≈ 30~50mΩ   → 导通损耗极小（几十毫欧）
+  • Id(max) ≈ 4~5A       → 远大于 LED 电流需求
+    </div>
+    <div class="callout callout-info">💡 MOSFET 的本质：用 <strong>3.3V/微安级别</strong> 的栅极电压，控制 <strong>数安培</strong> 的漏-源电流。这就是"小电流控制大电流"。</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📐 最小可用电路拓扑（冷暖各一路，共两路）</div>
+    <div class="ascii">
+                     12V / 24V DC 母线
+                           │
+                    ┌──────┴──────┐
+                    │ 冷白 LED 串  │  (或灯板正极)
+                    └──────┬──────┘
+                           │ (LED负极)
+             Rg 100Ω       │
+  GPIO_CW ──┤├──────────── D
+                       AO3400
+                           S ─────────────────── GND
+                           G (也接 Rpd 10kΩ → GND)
+
+  同理，GPIO_WW → 第二路 AO3400 → 暖白 LED 串
+
+  关键元件说明：
+  ┌─────────────┬───────────┬────────────────────────────┐
+  │ 元件         │ 典型值    │ 作用                        │
+  ├─────────────┼───────────┼────────────────────────────┤
+  │ Rg 栅极电阻  │ 100Ω     │ 阻尼 PWM 开关振铃，防 EMI   │
+  │ Rpd 下拉    │ 10kΩ     │ 模组未启动时强制 MOSFET 关断  │
+  │ Cin 输入滤波 │ 100µF+   │ LED 开关时稳定 DC 母线电压   │
+  │            │ 100nF    │ 高频滤波                     │
+  └─────────────┴───────────┴────────────────────────────┘
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h4 class="text-amber">只用 MOSFET 够了的情况</h4>
+      <ul class="plain">
+        <li>LED 灯带（内置限流电阻）</li>
+        <li>LED 驱动已是恒流输出，你只控制通断</li>
+        <li>简单 PWM 调光（不需精确恒流）</li>
+      </ul>
+      <div class="callout callout-ok">✅ MVP 阶段用此方案</div>
+    </div>
+    <div class="card">
+      <h4 class="text-amber">必须上恒流驱动芯片的情况</h4>
+      <ul class="plain">
+        <li>裸 LED 灯珠串联（无限流电阻）</li>
+        <li>需要精确亮度（工业照明、医疗灯）</li>
+        <li>多路 LED 一致性要求高</li>
+      </ul>
+      <div class="callout callout-warn">⚠️ 后期扩展可选 PT4115 / BP3316</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========== Q4 电源 ========== -->
+<div id="q4" class="section section-anchor fade-in">
+  <div class="section-label">Q4 · POWER ARCHITECTURE</div>
+  <div class="section-title">AC→DC 后的电源分配与转换</div>
+  <div class="section-sub">LDO vs Buck，以及为什么滤波电容几乎必选</div>
+
+  <div class="ascii">
+  AC 220V → [成品开关电源模块] → DC 母线(12V/24V/48V)
+                                          │
+                        ┌─────────────────┼──────────────────────┐
+                        │                 │                      │
+               ┌────────┴────────┐  ┌─────┴──────┐       ┌──────┴──────┐
+               │  LDO 降压       │  │  Buck 降压  │       │  LED 负载   │
+               │ (母线 ≤15V 时)  │  │ (母线>18V)  │       │ 直接挂母线  │
+               │ AMS1117-3.3    │  │ MP2315 等   │       │            │
+               │ 输入压差:&lt;15V  │  │ 效率 90%+   │       │            │
+               └────────┬────────┘  └─────┬──────┘       └────────────┘
+                        └────────┬─────────┘
+                                 │ 3.3V
+                           ┌─────┴──────┐
+                           │  WiFi/BLE   │
+                           │  模组        │
+                           └────────────┘
+  </div>
+
+  <div class="table-wrap card">
+    <div class="card-title">📊 四种转换器对比</div>
+    <table>
+      <thead><tr><th>类型</th><th>解决什么问题</th><th>效率</th><th>热损耗</th><th>成本</th><th>MVP 里用？</th></tr></thead>
+      <tbody>
+        <tr><td><strong>AC-DC（离线）</strong></td><td>市电 → 安全低压 DC</td><td>80-90%</td><td>中</td><td>高</td><td>✅ 必选（买成品）</td></tr>
+        <tr><td><strong>Buck（降压）</strong></td><td>高压 DC → 低压 DC，高效</td><td>88-95%</td><td>低</td><td>中</td><td>⚠️ 母线>18V 时必须</td></tr>
+        <tr><td><strong>LDO（线性）</strong></td><td>小压差降压，超简单</td><td>30-70%</td><td>高</td><td>低</td><td>✅ 母线12V 时推荐</td></tr>
+        <tr><td><strong>Boost（升压）</strong></td><td>低压 → 高压</td><td>85-92%</td><td>低</td><td>中</td><td>❌ 本方案用不到</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h4 class="text-cyan">12V 母线 → 3.3V（选 LDO）</h4>
+      <p>压差 = 12V - 3.3V = 8.7V，功耗 = 8.7V × 模组电流（~80mA）= <strong>约 0.7W 热量</strong></p>
+      <p>AMS1117-3.3 可承受，但要摸一摸，烫手说明散热不够。</p>
+      <div class="callout callout-ok">✅ MVP 推荐：12V + AMS1117-3.3，成本低，接线简单</div>
+    </div>
+    <div class="card">
+      <h4 class="text-amber">24V/48V 母线 → 3.3V（必须 Buck）</h4>
+      <p>压差 = 44.7V，功耗 = 44.7V × 80mA = <strong>约 3.6W</strong>——LDO 会烫死</p>
+      <p>选 MP2315 / SY8089 等 Buck 芯片，效率 90%+，热损耗仅 0.3W。</p>
+      <div class="callout callout-warn">⚠️ 48V 驱动场景下 LDO 是严重错误，会导致灯具内过热</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔋 为什么电容几乎必须加？</div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>不加电容的现象</th><th>原因</th><th>解决方案</th></tr></thead>
+      <tbody>
+        <tr><td>模组反复复位</td><td>LED 开关瞬间电流突变，母线电压骤降触发欠压复位</td><td>输入 100µF 电解电容</td></tr>
+        <tr><td>LED 闪烁/闪一下</td><td>PWM 开关产生的尖峰电压，耦合到 3.3V 供电</td><td>LDO 输出 22µF + 100nF</td></tr>
+        <tr><td>串口乱码</td><td>地线上的高频噪声干扰 UART 信号</td><td>靠近引脚加 100nF</td></tr>
+        <tr><td>WiFi 信号不稳定</td><td>射频电路对电源纹波极其敏感</td><td>模组 VCC 脚旁路 100nF</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout callout-info">💡 原则：大电容（10µF+）蓄能缓冲，小电容（100nF）滤高频。两个都要，缺一不可。</div>
+  </div>
+</div>
+
+
+<!-- ========== Q5 保护电路 ========== -->
+<div id="q5" class="section section-anchor fade-in">
+  <div class="section-label">Q5 · PROTECTION CIRCUITS</div>
+  <div class="section-title">保护电路：Demo 阶段最低底线</div>
+  <div class="section-sub">用成品电源模块规避 AC 侧风险，DC 侧 5 种保护</div>
+
+  <div class="callout callout-error">⚡ AC 侧保护策略：使用带内置保险丝/MOV/NTC 的认证开关电源模块（如明纬 IRM 系列）。不要自己在面包板上搭 AC 侧电路。这一条是不可妥协的安全底线。</div>
+
+  <div class="table-wrap card">
+    <div class="card-title">🛡️ DC 侧最低保护清单</div>
+    <table>
+      <thead><tr><th>保护类型</th><th>推荐器件</th><th>作用</th><th>不加的风险</th><th>MVP 必选？</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>TVS 瞬态抑制</strong></td>
+          <td>SMBJ12A/24A</td>
+          <td>吸收 DC 输入端浪涌尖峰（如感性负载切换产生的 spike）</td>
+          <td>瞬间高压击穿 MOSFET 或模组</td>
+          <td><span class="badge badge-red">必选</span></td>
+        </tr>
+        <tr>
+          <td><strong>自恢复保险丝 PPTC</strong></td>
+          <td>500mA 规格</td>
+          <td>过流时自动断路，冷却后恢复，保护整板</td>
+          <td>短路时持续大电流，烧毁 PCB/模组</td>
+          <td><span class="badge badge-red">必选</span></td>
+        </tr>
+        <tr>
+          <td><strong>防反接二极管</strong></td>
+          <td>SS34 / B5819W</td>
+          <td>DC 输入极性接反时阻断，保护全板</td>
+          <td>客户接反一次就烧掉整块板</td>
+          <td><span class="badge badge-red">必选</span></td>
+        </tr>
+        <tr>
+          <td><strong>输入滤波电容</strong></td>
+          <td>100µF/50V 电解</td>
+          <td>稳定 DC 母线，吸收开关电源纹波</td>
+          <td>模组频繁复位、WiFi 连接不稳</td>
+          <td><span class="badge badge-red">必选</span></td>
+        </tr>
+        <tr>
+          <td><strong>旁路电容</strong></td>
+          <td>100nF 陶瓷（×3+）</td>
+          <td>模组 VCC、LDO 输出、MOSFET 驱动供电各放一个</td>
+          <td>高频噪声干扰 WiFi 射频，信号不稳</td>
+          <td><span class="badge badge-red">必选</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h4 class="text-green">✅ Demo 阶段可暂缓的保护</h4>
+      <ul class="plain">
+        <li>OVP 过压保护（用成品电源代替）</li>
+        <li>OTP 过温保护（手动监测温度）</li>
+        <li>EMC 滤波（不送检时可省略）</li>
+        <li>MOV 压敏电阻（在 AC 侧，成品电源已含）</li>
+        <li>NTC 热敏电阻（限流，成品电源已含）</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 class="text-red">⚠️ 暂缓上述保护的风险</h4>
+      <ul class="plain">
+        <li>OVP 缺失：驱动输出异常高压时，MOSFET 击穿</li>
+        <li>OTP 缺失：灯具内过热可能导致模组死机</li>
+        <li>EMC 缺失：送检必定不过，量产前必须补</li>
+      </ul>
+      <div class="callout callout-warn">⚠️ 这些是"后置"而非"不要"。正式产品必须补全。</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========== Q6 WiFi vs Zigbee ========== -->
+<div id="q6" class="section section-anchor fade-in">
+  <div class="section-label">Q6 · WIFI vs ZIGBEE</div>
+  <div class="section-title">网关到底是什么？为什么先跑 WiFi？</div>
+  <div class="section-sub">协议角色图解 + 工程上的渐进策略</div>
+
+  <div class="card">
+    <div class="card-title">🏗️ Zigbee 系统角色图</div>
+    <div class="ascii">
+  App（手机）
+      │
+      ▼ HTTPS/MQTT
+   涂鸦云
+      │
+      ▼ 局域网
+  ┌─────────────────────────────────────────────────────────┐
+  │         Zigbee 网关（协调器 Coordinator）                │
+  │   • 连接家庭 WiFi，桥接 IP 网络 ↔ Zigbee 网络          │
+  │   • 管理 Zigbee 网络拓扑（哪些设备在网）               │
+  │   • 例：涂鸦 TYGWZ-01                                  │
+  └──────────────┬──────────────────────────────────────────┘
+                  │ Zigbee 2.4GHz 无线
+        ┌─────────┴──────────┐
+   ┌────┴────┐          ┌────┴────┐
+   │ 路由器   │          │ 路由器   │  (信号中继，≥5m 距离时增加覆盖)
+   │ ZS3L灯  │          │ ZS3L灯  │
+   └────┬────┘          └─────────┘
+        │ Zigbee Mesh
+   ┌────┴────┐
+   │ 终端节点 │  (只收发，不转发，通常是电池设备)
+   │ 传感器   │
+   └─────────┘
+    </div>
+    <p><strong>网关的作用：</strong>Zigbee 是纯无线 Mesh 协议，本身没有 IP 地址，无法直接连互联网。网关负责<strong>协议转换</strong>（Zigbee ↔ TCP/IP），是 Zigbee 设备接入云端和 App 的唯一桥梁。</p>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h4 class="text-cyan">📶 WiFi 方案拓扑</h4>
+      <div class="ascii" style="font-size:12px">
+ App → 云 → 家庭路由器
+              │ WiFi
+         WB3S 模组
+         （直接有 IP）
+         → 控制 MOSFET
+      </div>
+      <ul class="plain">
+        <li>无需额外网关设备</li>
+        <li>模组直接有 IP，App 直控</li>
+        <li>部署超简单，零额外成本</li>
+        <li>断网后无法控制（依赖云）</li>
+        <li>大量设备时路由器压力大</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 class="text-purple">🏠 Zigbee 方案拓扑</h4>
+      <div class="ascii" style="font-size:12px">
+ App → 云 → 网关(WiFi)
+              │ Zigbee
+         ZS3L 模组 (Mesh)
+         → 控制 MOSFET
+      </div>
+      <ul class="plain">
+        <li>需要 Zigbee 网关（¥80+）</li>
+        <li>支持 Mesh 组网，覆盖更广</li>
+        <li>断网可本地控制（离线）</li>
+        <li>100+ 设备稳定组网</li>
+        <li>功耗更低（利于电池设备）</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🤔 为什么工程上先跑 WiFi？</div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>验证目标</th><th>WiFi 能验证</th><th>是否需要 Zigbee</th></tr></thead>
+      <tbody>
+        <tr><td>电源链路（LDO/Buck）是否正常</td><td>✅ 是</td><td>❌ 无关</td></tr>
+        <tr><td>MOSFET 开关是否正常</td><td>✅ 是</td><td>❌ 无关</td></tr>
+        <tr><td>PWM 调光效果</td><td>✅ 是</td><td>❌ 无关</td></tr>
+        <tr><td>固件框架（DP 点、涂鸦 SDK）</td><td>✅ 是（WB3S 和 ZS3L SDK 框架相同）</td><td>❌ 无关</td></tr>
+        <tr><td>App 控制体验</td><td>✅ 是</td><td>❌ 无关</td></tr>
+        <tr><td>Mesh 组网、离线控制</td><td>❌ 否</td><td>✅ 需要</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout callout-ok">✅ 结论：WiFi 跑通 = 80% 的工作量完成。切 Zigbee 只需换模组 + 配置网关，1 天内搞定。串行不是并行，省 1 倍调试时间。</div>
+  </div>
+</div>
+
+
+<!-- ========== Q7 模组/MCU/PCB ========== -->
+<div id="q7" class="section section-anchor fade-in">
+  <div class="section-label">Q7 · MODULE / MCU / PCB / BOM</div>
+  <div class="section-title">把概念关系讲清楚</div>
+  <div class="section-sub">模组 vs SoC vs MCU；开发板的用途；PCB 是什么交付物</div>
+
+  <div class="ascii">
+  ┌─────────────────────────────────────────────────────────────────┐
+  │                        概念层次图                               │
+  ├─────────────────────────────────────────────────────────────────┤
+  │ SoC（片上系统）                                                  │
+  │   └── 单颗芯片：CPU核 + RAM + Flash + 射频 + 外设               │
+  │       例：BK7231N（涂鸦 WB3S 内部芯片）                        │
+  │                                                                 │
+  │ 模组（Module）                                                  │
+  │   └── SoC + 外围（晶振/滤波/天线/Flash） 封装成小板             │
+  │       焊接到你的 PCB 上即可用，不用懂射频设计                   │
+  │       例：WB3S（含 BK7231N + 天线 + 必要阻容）                 │
+  │                                                                 │
+  │ MCU（微控制器）                                                  │
+  │   └── 无射频的 SoC，专注控制（STM32、ATmega 等）               │
+  │       WB3S 里的 BK7231N 既是 MCU 又有 WiFi，属 SoC              │
+  │                                                                 │
+  │ 开发板（Dev Board）                                              │
+  │   └── 模组 + USB/串口/排针/LED 做成评估平台                    │
+  │       用于：验证固件、学习 API、不需焊接                        │
+  │       ≠ 最终产品 PCB，但验证完再画 PCB                         │
+  │                                                                 │
+  │ PCB（印制电路板）                                                │
+  │   └── 你的最终产品载板，把模组+MOSFET+电源+保护全部集成        │
+  │       EDA 画好 → 嘉立创/捷配打样 → 贴片焊接                   │
+  │                                                                 │
+  │ BOM（物料清单）                                                  │
+  │   └── PCB 上每一个器件的型号、规格、数量、供应商               │
+  │       决定成本、交货期、替代料风险                              │
+  └─────────────────────────────────────────────────────────────────┘
+  </div>
+
+  <div class="four-point">
+    <div class="fp">
+      <div class="fp-label" style="color:var(--cyan)">模组 vs 自研 SoC</div>
+      <p>MVP 阶段：用模组（WB3S），无需做射频设计，有 FCC/CE 认证。量产 10 万+ 才考虑自研 SoC 降本。</p>
+    </div>
+    <div class="fp">
+      <div class="fp-label" style="color:var(--amber)">开发板的正确用法</div>
+      <p>开发板 = 临时试验台。用它跑通固件逻辑，验证 DP 点和 SDK API，然后把同样的电路搬到自己的 PCB 上。</p>
+    </div>
+    <div class="fp">
+      <div class="fp-label" style="color:var(--green)">PCB 是什么层面的交付物</div>
+      <p>PCB 是你向客户交付的硬件核心。包含：Gerber 文件（打板）+ BoM（采购）+ 贴片位号图（组装）。</p>
+    </div>
+    <div class="fp">
+      <div class="fp-label" style="color:var(--purple)">BOM 对成本的影响</div>
+      <p>BOM 决定单板成本。每个器件要有主料 + 替代料，防止单一供应商断货。涨价季主料缺货时替代料救命。</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========== Q8 器件命名与选型 ========== -->
+<div id="q8" class="section section-anchor fade-in">
+  <div class="section-label">Q8 · PART NAMING & SELECTION</div>
+  <div class="section-title">WB3S / WB3S-IPEX / ZS3L 命名解析 + 选型核实方法</div>
+  <div class="section-sub">如何工程化核实一个你不确定的器件</div>
+
+  <div class="card">
+    <div class="card-title">🏷️ 涂鸦模组命名规则解析</div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>型号</th><th>协议</th><th>天线方式</th><th>芯片</th><th>认证</th><th>选择建议</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>WB3S</code></td>
+          <td>WiFi 2.4G + BLE</td>
+          <td>PCB 板载天线</td>
+          <td>BK7231N</td>
+          <td>FCC/CE/SRRC</td>
+          <td>✅ 非金属外壳灯具首选</td>
+        </tr>
+        <tr>
+          <td><code>WB3S-IPEX</code></td>
+          <td>WiFi 2.4G + BLE</td>
+          <td>IPEX 座（外接天线）</td>
+          <td>BK7231N</td>
+          <td>FCC/CE</td>
+          <td>✅ 金属外壳/厚壁灯具</td>
+        </tr>
+        <tr>
+          <td><code>ZS3L</code></td>
+          <td>Zigbee 3.0</td>
+          <td>PCB 板载天线</td>
+          <td>TLSR8258</td>
+          <td>FCC/CE</td>
+          <td>✅ 全屋组网/边缘计算</td>
+        </tr>
+        <tr>
+          <td><code>ZT3L</code></td>
+          <td>Zigbee 3.0</td>
+          <td>PCB 板载天线</td>
+          <td>CC2652P 或等效</td>
+          <td>FCC/CE</td>
+          <td>✅ 低成本量产替代</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout callout-info">💡 命名规律：W=WiFi，Z=Zigbee；B/S/T 代表方案代次；L=小型；IPEX=外接天线接口。不同厂家命名有差异，一定查原厂 Datasheet 确认。</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔍 工程化核实一个陌生器件（SOP）</div>
+    <div class="phases">
+      <div class="phase">
+        <h4>Step 1：查原厂官网 + 涂鸦模块页</h4>
+        <ul>
+          <li>涂鸦官方模组页面：<code>developer.tuya.com</code> → Hardware → Modules</li>
+          <li>搜型号全称（含后缀），下载 Datasheet PDF，看引脚图和电气参数</li>
+          <li>如果搜不到：说明该型号可能停产、改名或是山寨</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <h4>Step 2：查模组丝印 + 认证编号</h4>
+        <ul>
+          <li>实物模组正面丝印通常印有型号 + 批次号</li>
+          <li>FCC ID 可在 <code>fcc.io</code> 或 <code>fccid.io</code> 查询，确认是否是涂鸦申请的</li>
+          <li>CE 认证看 DOC（符合性声明）文件</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <h4>Step 3：核实芯片方案</h4>
+        <ul>
+          <li>开壳（或查 Datasheet）确认内部主芯片型号</li>
+          <li>如 BK7231N（博通/Beken）→ 可找 Beken 原厂技术支持</li>
+          <li>淘宝同名型号风险：可能是非官方渠道，固件可能无法用涂鸦 SDK 烧录</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <h4>Step 4：淘宝/立创商城核实来源</h4>
+        <ul>
+          <li>优先从涂鸦官方授权代理商购买（涂鸦官网有代理商列表）</li>
+          <li>立创商城 / 华秋商城 有正规渠道货</li>
+          <li>拿到实物：烧录涂鸦标准测试固件，看是否能配网 — 这是最终核实</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🧠 ZS3L "边缘计算"是什么意思？</div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>设备类型</th><th>算力量级</th><th>能做什么</th></tr></thead>
+      <tbody>
+        <tr><td>普通 MCU（STM32F103）</td><td>72MHz Cortex-M3</td><td>控制逻辑、定时、PWM</td></tr>
+        <tr><td>WiFi/Zigbee SoC（BK7231N / TLSR8258）</td><td>120~160MHz</td><td>+ 通信协议栈、本地规则引擎、简单场景联动</td></tr>
+        <tr><td>ZS3L"边缘计算"</td><td>同上，TLSR8258</td><td>断网时本地执行"定时开灯/亮度渐变"规则，不需要云</td></tr>
+        <tr><td>AI 边缘芯片（如 K210）</td><td>400MHz RISC-V × 2</td><td>图像识别、语音唤醒（完全不同量级）</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout callout-info">💡 ZS3L 的"边缘计算"= 本地自动化规则（如"23:00 自动关灯""渐亮唤醒"），而非 AI 推理。量级和 MCU 相当，和 AI 芯片差 2 个数量级。</div>
+  </div>
+</div>
+
+
+<!-- ========== BOM 清单 ========== -->
+<div id="bom" class="section section-anchor fade-in">
+  <div class="section-label">BOM · BILL OF MATERIALS</div>
+  <div class="section-title">完整优化硬件 BOM 清单</div>
+  <div class="section-sub">按功能模块分组，标注 MVP 必选/可选/后期</div>
+
+  <!-- 核心模组 -->
+  <div class="card">
+    <div class="card-title">① 核心智能模组 <span class="badge badge-red">必选其一</span></div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>型号</th><th>协议</th><th>尺寸</th><th>特点</th><th>适用场景</th><th>参考价</th></tr></thead>
+      <tbody>
+        <tr><td><strong>WB3S</strong></td><td><span class="badge badge-cyan">WiFi+BLE</span></td><td>16×24mm</td><td>板载天线，9路GPIO，多路PWM</td><td>Route A · 首选</td><td>¥8-12</td></tr>
+        <tr><td><strong>WB3S-IPEX</strong></td><td><span class="badge badge-cyan">WiFi+BLE</span></td><td>16×24mm</td><td>外接天线，穿透金属外壳</td><td>金属壳灯具</td><td>¥9-13</td></tr>
+        <tr><td><strong>ZS3L</strong></td><td><span class="badge badge-purple">Zigbee3.0</span></td><td>16×24mm</td><td>与WB3S同引脚，可边缘计算</td><td>Route B · 全屋</td><td>¥10-14</td></tr>
+        <tr><td><strong>ZT3L</strong></td><td><span class="badge badge-purple">Zigbee3.0</span></td><td>15×22mm</td><td>低成本，量产替代 ZS3L</td><td>批量走量</td><td>¥6-9</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 功率驱动 -->
+  <div class="card">
+    <div class="card-title">② 功率驱动级 <span class="badge badge-red">必选</span></div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>器件</th><th>推荐型号</th><th>作用</th><th>数量/板</th><th>关键参数</th></tr></thead>
+      <tbody>
+        <tr><td><strong>N-MOSFET</strong></td><td>AO3400 / SI2302</td><td>PWM信号 → 大电流 LED 开关</td><td>2（冷+暖各1）</td><td>Vgs≤3.3V导通，Rds(on)&lt;50mΩ，Id≥3A</td></tr>
+        <tr><td><strong>栅极限流电阻</strong></td><td>100Ω / 0402</td><td>阻尼振铃，抑制 EMI</td><td>2</td><td>每个 MOSFET 栅极串联</td></tr>
+        <tr><td><strong>栅极下拉电阻</strong></td><td>10kΩ / 0402</td><td>上电初始化期间确保 MOSFET 关断</td><td>2</td><td>G 到 GND</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 电源转换 -->
+  <div class="card">
+    <div class="card-title">③ 电源转换 <span class="badge badge-red">必选</span></div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>器件</th><th>推荐型号</th><th>适用场景</th><th>关键参数</th><th>参考价</th></tr></thead>
+      <tbody>
+        <tr><td><strong>LDO 稳压</strong></td><td>AMS1117-3.3 / ME6211C33</td><td>12V 母线</td><td>输入≤18V，输出3.3V/1A</td><td>¥0.2-0.5</td></tr>
+        <tr><td><strong>Buck 降压</strong>（二选一）</td><td>MP2315 / SY8089 / MP2338</td><td>24V/48V 母线</td><td>输入6-28V，输出3.3V，效率90%+</td><td>¥1-3</td></tr>
+        <tr><td><strong>输入滤波电容</strong></td><td>100µF/50V 电解 + 100nF MLCC</td><td>LDO/Buck 输入端</td><td>靠近稳压器放置</td><td>¥0.3</td></tr>
+        <tr><td><strong>输出滤波电容</strong></td><td>22µF/10V MLCC + 100nF MLCC</td><td>3.3V 输出端</td><td>靠近模组 VCC 引脚</td><td>¥0.3</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 保护器件 -->
+  <div class="card">
+    <div class="card-title">④ 保护与辅助器件 <span class="badge badge-amber">强烈推荐</span></div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>器件</th><th>型号</th><th>作用</th><th>参考价</th></tr></thead>
+      <tbody>
+        <tr><td>TVS 瞬态抑制二极管</td><td>SMBJ12A（12V母线）/ SMBJ24A（24V）</td><td>浪涌保护</td><td>¥0.3</td></tr>
+        <tr><td>自恢复保险丝 PPTC</td><td>0805 / 500mA</td><td>过流保护，自动恢复</td><td>¥0.5</td></tr>
+        <tr><td>防反接二极管</td><td>SS34 / B5819W（肖特基）</td><td>防极性接反</td><td>¥0.1</td></tr>
+        <tr><td>状态指示 LED</td><td>0402 红/蓝 + 1kΩ 限流</td><td>配网/运行状态</td><td>¥0.1</td></tr>
+        <tr><td>配网按键</td><td>3×4mm 贴片轻触开关</td><td>手动配网/恢复出厂</td><td>¥0.2</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Zigbee 网关 -->
+  <div class="card">
+    <div class="card-title">⑤ Zigbee 网关 <span class="badge badge-purple">Route B 必配</span></div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>型号</th><th>说明</th><th>参考价</th></tr></thead>
+      <tbody>
+        <tr><td><strong>TYGWZ-01</strong>（涂鸦成品）</td><td>即插即用，测试/小批量首选，无需开发</td><td>¥80-120</td></tr>
+        <tr><td><strong>ZGW1 模组</strong>（自研网关）</td><td>嵌入自有硬件，私有云/SaaS 部署</td><td>¥35-50</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 开发设备 -->
+  <div class="card">
+    <div class="card-title">⑥ 开发测试设备 <span class="badge badge-green">建议配齐</span></div>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>设备</th><th>用途</th><th>参考价</th></tr></thead>
+      <tbody>
+        <tr><td>涂鸦三明治开发板</td><td>免焊接验证模组功能，快速上手</td><td>¥50-80</td></tr>
+        <tr><td>USB转TTL (CH340/CP2102)</td><td>串口调试、固件烧录</td><td>¥8-15</td></tr>
+        <tr><td>逻辑分析仪（8通道）</td><td>验证 PWM 波形、占空比、频率</td><td>¥50-100</td></tr>
+        <tr><td>数字万用表</td><td>量电压/电流/通断</td><td>¥30-80</td></tr>
+        <tr><td>冷暖双色 LED 灯板（样品）</td><td>3000K暖白+6500K冷白，验证混光效果</td><td>¥15-30</td></tr>
+        <tr><td>可调恒压 DC 电源（或 12V 开关电源）</td><td>稳定 DC 母线，模拟真实驱动输出</td><td>¥20-100</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- 成本估算 -->
+  <div class="grid2">
+    <div class="card" style="border-top:3px solid var(--cyan)">
+      <h3 style="color:var(--cyan2)">WiFi 方案单板成本（WB3S）</h3>
+      <table>
+        <tbody>
+          <tr><td>WB3S 模组</td><td style="text-align:right;font-family:var(--mono)">¥10.0</td></tr>
+          <tr><td>MOSFET×2 + 栅极电阻×4</td><td style="text-align:right;font-family:var(--mono)">¥0.8</td></tr>
+          <tr><td>LDO/Buck + 滤波电容</td><td style="text-align:right;font-family:var(--mono)">¥1.5</td></tr>
+          <tr><td>保护器件（TVS+PPTC+二极管）</td><td style="text-align:right;font-family:var(--mono)">¥1.0</td></tr>
+          <tr><td>按键+LED+电阻</td><td style="text-align:right;font-family:var(--mono)">¥0.3</td></tr>
+          <tr><td>PCB（拼板均摊）</td><td style="text-align:right;font-family:var(--mono)">¥1.0</td></tr>
+          <tr><td>贴片焊接+测试</td><td style="text-align:right;font-family:var(--mono)">¥2.0</td></tr>
+          <tr style="background:rgba(34,211,238,.05)"><td><strong>合计</strong></td><td style="text-align:right;font-family:var(--mono);color:var(--cyan2);font-weight:700">≈ ¥16.6</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple)">
+      <h3 style="color:var(--purple)">Zigbee 方案单板成本（ZT3L）</h3>
+      <table>
+        <tbody>
+          <tr><td>ZT3L 模组</td><td style="text-align:right;font-family:var(--mono)">¥7.0</td></tr>
+          <tr><td>MOSFET×2 + 栅极电阻×4</td><td style="text-align:right;font-family:var(--mono)">¥0.8</td></tr>
+          <tr><td>LDO/Buck + 滤波电容</td><td style="text-align:right;font-family:var(--mono)">¥1.5</td></tr>
+          <tr><td>保护器件（TVS+PPTC+二极管）</td><td style="text-align:right;font-family:var(--mono)">¥1.0</td></tr>
+          <tr><td>按键+LED+电阻</td><td style="text-align:right;font-family:var(--mono)">¥0.3</td></tr>
+          <tr><td>PCB（拼板均摊）</td><td style="text-align:right;font-family:var(--mono)">¥1.0</td></tr>
+          <tr><td>贴片焊接+测试</td><td style="text-align:right;font-family:var(--mono)">¥2.0</td></tr>
+          <tr style="background:rgba(188,140,255,.05)"><td><strong>合计</strong></td><td style="text-align:right;font-family:var(--mono);color:var(--purple);font-weight:700">≈ ¥13.6</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========== 实施方案 ========== -->
+<div id="phases" class="section section-anchor fade-in">
+  <div class="section-label">PHASES · IMPLEMENTATION</div>
+  <div class="section-title">前期实施方案（四阶段）</div>
+  <div class="section-sub">从面包板原型到量产准备</div>
+
+  <div class="card">
+    <div class="phases">
+      <div class="phase">
+        <h4>Phase 1 · 原型验证 <span class="badge badge-green">第 1-2 周</span></h4>
+        <p>目标：面包板跑通"模组→MOSFET→冷暖 LED"全链路</p>
+        <ul>
+          <li>采购 WB3S×5 + AO3400×10 + AMS1117-3.3×5 + 12V 开关电源 + 冷暖灯板</li>
+          <li>面包板接线：12V → LDO → 3.3V 供模组；GPIO → 100Ω → MOSFET 栅极 → LED</li>
+          <li>涂鸦 IoT 平台创建产品，选品类「照明→灯」，配置 DP 点（开关/亮度/色温）</li>
+          <li>串口烧录固件，涂鸦智能 App 配网（EZ 模式），App 控制开关</li>
+          <li>配置双路 PWM（2kHz+），App 滑块调光 + 调色温混光</li>
+        </ul>
+        <div class="callout callout-ok">✅ 里程碑：App 控制平滑调光调色温，无可见闪烁，响应 &lt;500ms</div>
+      </div>
+
+      <div class="phase">
+        <h4>Phase 2 · PCB 设计与小批量 <span class="badge badge-amber">第 3-5 周</span></h4>
+        <p>目标：设计通用智能中间层 PCB，覆盖 WiFi/Zigbee 双版本</p>
+        <ul>
+          <li>EDA 设计（推荐立创 EDA）：WB3S/ZS3L 双兼容封装（同引脚兼容）</li>
+          <li>板载：LDO+Buck 可选焊盘 + MOSFET 驱动级 + 保护电路 + 配网按键 + 指示 LED</li>
+          <li>接口：DC 输入端子（支持 12V/24V）+ 冷暖输出端子（兼容2/4线灯板）</li>
+          <li>目标尺寸：≤ 20×30mm（可内嵌主流灯具）</li>
+          <li>嘉立创打样 10 片（约 5 天到手），SMT 贴片焊接</li>
+          <li>分别测试 WiFi 版（T5-E1/T3-3S）和 Zigbee 版（ZS3L）</li>
+        </ul>
+        <div class="callout callout-info">💡 关键：模组焊盘兼容设计，一套 PCB 插 WiFi 或 Zigbee 均可，无需改版</div>
+      </div>
+
+      <div class="phase">
+        <h4>Phase 3 · 产品集成测试 <span class="badge badge-amber">第 6-8 周</span></h4>
+        <p>目标：装入实际灯具验证，暴露真实场景问题</p>
+        <ul>
+          <li>选 3 种代表灯具：异形花灯（天线信号测试）、筒灯（散热测试）、LED 灯泡</li>
+          <li>高温老化测试：连续运行 72h，温度计监测模组温度（目标 &lt;85°C）</li>
+          <li>WiFi/Zigbee 信号穿透测试：不同外壳材质（塑料/铝/铁）的影响</li>
+          <li>Zigbee 组网稳定性：10+ 设备同时在线，网关控制延迟 &lt;300ms</li>
+          <li>OTA 远程固件升级：验证升级不变砖，升级后功能正常</li>
+        </ul>
+      </div>
+
+      <div class="phase">
+        <h4>Phase 4 · 认证与量产准备 <span class="badge badge-purple">第 9-12 周</span></h4>
+        <p>目标：拿证 + 建立产线流程</p>
+        <ul>
+          <li>整机送检 FCC（美）、CE（欧）、RoHS — 模组已有证，整机补充测试</li>
+          <li>设计量产测试治具：一键烧录 + 功能自动检测（通过/失败）</li>
+          <li>编写量产固件：定制配网流程、灯效预设、定时功能</li>
+          <li>涂鸦 OEM App 或自有 App 品牌化（涂鸦提供白标方案）</li>
+          <li>首批量产 500~1000 片，发往目标市场试销验证</li>
+        </ul>
+        <div class="callout callout-warn">⚠️ 认证周期约 3-4 周。FCC 约 ¥8k-15k，CE 约 ¥5k-10k。模组已有证可大幅简化整机认证。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========== 验收清单 ========== -->
+<div id="checklist" class="section section-anchor fade-in">
+  <div class="section-label">CHECKLIST · ACCEPTANCE</div>
+  <div class="section-title">"跑通"验收清单</div>
+  <div class="section-sub">点击复选框标记进度（本页刷新前有效）</div>
+
+  <div class="card" style="border-top:3px solid var(--green);margin-bottom:14px">
+    <h4 style="margin-bottom:16px">📦 物料到货状态（2026-05-27）</h4>
+    <div class="grid2">
+      <div>
+        <p style="color:var(--green2);font-family:var(--mono);font-size:.8rem;margin-bottom:8px">✅ 已到货</p>
+        <ul class="plain">
+          <li>T5AI-Core 开发板</li>
+          <li>YYNMOS-4/NMOS-4 MOSFET 模块 ×2</li>
+          <li>DC 转接头</li>
+          <li>线材</li>
+          <li>12V 单色灿带</li>
+          <li>双色温灿带（12V/24V）</li>
+          <li>12V 2A 电源适配器</li>
+          <li>小螺丝刀、万用表尖表笔</li>
+        </ul>
+      </div>
+      <div>
+        <p style="color:var(--red2);font-family:var(--mono);font-size:.8rem;margin-bottom:8px">❌ 待补购</p>
+        <ul class="plain" style="--tw:var(--red2)">
+          <li style="color:var(--red2)">剥线陡 （接线必须，优先）</li>
+          <li style="color:var(--red2)">剪鑡 （剪灯带必须，优先）</li>
+          <li style="color:var(--t2)">绝缘胶带</li>
+          <li style="color:var(--t2)">热缩管</li>
+          <li style="color:var(--t2)">镜子</li>
+          <li style="color:var(--t2)">打火机 / 热风枪</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout callout-warn" style="margin-top:12px">⚠️ 剥线陡和剪鑡待补购后再开始接线。其他工具不影响 T5AI-Core 单板上电验证。</div>
+  </div>
+
+  <div class="card">
+    <h4 style="margin-bottom:16px">🔋 电源链路</h4>
+    <ul class="checklist" id="cl-power">
+      <li><div class="check-box" onclick="toggle(this)"></div>DC 输入上电，万用表量 LDO/Buck 输出为 3.3V ±0.1V</li>
+      <li><div class="check-box" onclick="toggle(this)"></div>LDO 壳温 &lt;60°C（手摸 3 秒不烫手），否则改用 Buck</li>
+      <li><div class="check-box" onclick="toggle(this)"></div>示波器/逻辑分析仪量 3.3V 纹波 &lt;50mV（无大电容时先不强求）</li>
+      <li><div class="check-box" onclick="toggle(this)"></div>LED 开关 10 次，3.3V 不跌落 &gt;0.3V</li>
+    </ul>
+
+    <h4 style="margin:20px 0 16px">📶 通信与配网</h4>
+    <ul class="checklist" id="cl-wifi">
+      <li><div class="check-box" onclick="toggle(this)"></div>模组串口上电 log 正常输出，无反复重启</li>
+      <li><div class="check-box" onclick="toggle(this)"></div>涂鸦 App EZ 配网成功，App 显示设备"在线"</li>
+      <li><div class="check-box" onclick="toggle(this)"></div>配网后断电重上电，设备自动重连（&lt;30秒）</li>
+      <li><div class="check-box" onclick="toggle(this)"></div>[Zigbee] ZS3L 加入网关 Zigbee 网络，App 显示在线</li>
+    </ul>
+
+    <h4 style="margin:20px 0 16px">💡 功率控制</h4>
+    <ul class="checklist" id="cl-power2">
+      <li><div class="check-box" onclick="toggle(this)"></div>App 点击开关 → LED 响应时间 &lt;500ms</li>
+      <li><div class="check-box" onclick="toggle(this)"></div>PWM 调光：0%~100% 平滑，手机慢速录像无闪烁</li>
+      <li><div class="check-box" onclick="toggle(this)"></div>色温调节：冷暖混光连续可调，无突变跳变</li>
+      <li><div class="check-box" onclick="toggle(this)"></div>MOSFET 壳温 &lt;50°C（满载运行 30 分钟后测量）</li>
+    </ul>
+
+    <h4 style="margin:20px 0 16px">🔁 异常恢复</h4>
+    <ul class="checklist" id="cl-recovery">
+      <li><div class="check-box" onclick="toggle(this)"></div>断电重上电 5 次，每次恢复断电前的亮度/色温状态</li>
+      <li><div class="check-box" onclick="toggle(this)"></div>长按按键 5 秒恢复出厂，可重新配网</li>
+      <li><div class="check-box" onclick="toggle(this)"></div>连续运行 1 小时，不断连、不死机、不复位</li>
+    </ul>
+  </div>
+</div>
+
+
+<!-- ========== 十大坑 ========== -->
+<div id="pitfalls" class="section section-anchor fade-in">
+  <div class="section-label">TOP 10 · COMMON PITFALLS</div>
+  <div class="section-title">新手最容易踩的 10 个坑</div>
+  <div class="section-sub">电源、地线、栅极驱动、电容、回路、隔离安全</div>
+
+  <div class="pitfall">
+    <div class="pitfall-num">01</div>
+    <div class="pitfall-content">
+      <h5>⚡ 徒手搭建 AC 侧电路</h5>
+      <p>220V 不是面包板的玩具。哪怕只是量个电压，只要你的手碰到火线就可能致命。请始终使用成品认证电源模块，AC 侧检修断电后用放电棒确认无残留电荷。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-num">02</div>
+    <div class="pitfall-content">
+      <h5>🔌 GPIO 直接驱动 LED 灯串</h5>
+      <p>3.3V / 12mA GPIO 只是逻辑信号口，不是驱动口。直接接灯串轻则不亮，重则烧毁模组 IO。必须经过 MOSFET 功率开关级。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-num">03</div>
+    <div class="pitfall-content">
+      <h5>🌡️ 24V/48V 母线用 LDO 降压</h5>
+      <p>LDO 热损耗 = 压差 × 电流。48V - 3.3V = 44.7V，乘以 80mA = 3.6W，全变成热量。封闭灯具内温升超标，LDO 热保护断路，模组死机。务必用 Buck。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-num">04</div>
+    <div class="pitfall-content">
+      <h5>📦 忘加栅极下拉电阻</h5>
+      <p>模组上电期间 GPIO 是高阻状态（非 LOW），没有下拉电阻时 MOSFET 栅极悬空，受噪声影响随机导通，LED 在上电瞬间闪烁一下。必须加 10kΩ G→GND 下拉。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-num">05</div>
+    <div class="pitfall-content">
+      <h5>🔋 供电没滤波电容，模组反复复位</h5>
+      <p>LED 开关产生的电流突变，会导致 DC 母线短暂跌压。LDO 输入没有 100µF 电解电容缓冲，3.3V 跟着跌，模组欠压触发看门狗复位。接线越长问题越严重。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-num">06</div>
+    <div class="pitfall-content">
+      <h5>🕸️ 地线不汇聚、回路面积大</h5>
+      <p>面包板上 GND 飞线乱接，形成大面积电流环路。MOSFET 开关电流在回路中产生磁场，耦合到 WiFi 天线，导致信号掉线或配网失败。GND 要单点汇聚，回路面积越小越好。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-num">07</div>
+    <div class="pitfall-content">
+      <h5>📡 金属外壳灯具信号弱，用了板载天线版模组</h5>
+      <p>铝壳/铁壳灯具严重屏蔽 2.4GHz 信号，板载天线信号衰减 20dB+，必须用 IPEX 版本外接天线，把天线穿到灯具非金属区域。Demo 测试时灯壳开着没问题，装壳后才发现断连。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-num">08</div>
+    <div class="pitfall-content">
+      <h5>🌊 PWM 频率太低，肉眼/相机可见闪烁</h5>
+      <p>PWM 频率 &lt;100Hz，人眼能直接看到闪烁；&lt;500Hz，手机相机拍照出现条纹。建议频率 ≥ 2kHz（演示），高端产品建议 ≥ 10kHz。涂鸦 SDK 默认频率需确认并修改。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-num">09</div>
+    <div class="pitfall-content">
+      <h5>🏪 淘宝买了非官方渠道模组，固件烧不进</h5>
+      <p>非官方渠道的"WB3S"可能是仿品或其他芯片，涂鸦 SDK 烧录工具无法识别，或烧进去不能配网。请从立创商城/华秋/涂鸦授权代理采购，或直接在涂鸦官网开模组样品申请。</p>
+    </div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-num">10</div>
+    <div class="pitfall-content">
+      <h5>🔧 直接画 PCB，没有面包板验证就打样</h5>
+      <p>PCB 打样周期 5-7 天，一旦有错误（电源反接、MOSFET 方向错、引脚对不上）就要重新打样，浪费 1-2 周。正确顺序：面包板原型跑通全链路 → 确认每个信号 → 再画 PCB。</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ========== 场景速查 ========== -->
+<div class="section fade-in">
+  <div class="section-label">QUICK REFERENCE · SCENARIOS</div>
+  <div class="section-title">场景选型速查</div>
+
+  <div class="grid3">
+    <div class="card" style="border-top:3px solid var(--cyan)">
+      <h3 style="color:var(--cyan2)">🌐 海外零售 · 花灯</h3>
+      <p>无需网关，用户直接配网，零门槛</p>
+      <div style="margin:10px 0"><span class="badge badge-cyan">T5AI-Core</span> <span class="badge badge-cyan">WiFi直连</span></div>
+      <ul class="plain">
+        <li>用户手机直接配网</li>
+        <li>适配异形/复古造型</li>
+        <li>金属壳选 IPEX 版本</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:3px solid var(--purple)">
+      <h3 style="color:var(--purple)">🏠 全屋智能 · 商用</h3>
+      <p>网关组网，本地边缘计算，断网可控</p>
+      <div style="margin:10px 0"><span class="badge badge-purple">ZS3L</span> <span class="badge badge-purple">Zigbee3.0</span></div>
+      <ul class="plain">
+        <li>稳定 Mesh 组网</li>
+        <li>断网本地离线控制</li>
+        <li>私有 SaaS 部署</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top:3px solid var(--green)">
+      <h3 style="color:var(--green2)">📦 标品批量 · 走量</h3>
+      <p>筒灯/面板灯/吸顶灯，BOM 成本最低</p>
+      <div style="margin:10px 0"><span class="badge badge-green">ZT3L</span> <span class="badge badge-green">低成本</span></div>
+      <ul class="plain">
+        <li>BOM 成本最低</li>
+        <li>标准化批量生产</li>
+        <li>适合 ODM/OEM</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<footer>
+  <span>智能照明模块工程指南</span> · Phase 1: T5AI-Core + YYNMOS-4 + 12V 灿带 · v2.1 · 2026.05<br>
+  <span style="color:var(--t3)">基于涂鸦智能模组 · 所有价格仅供参考 · 以原厂 Datasheet 为准</span>
+</footer>
+
+<script>
+// Fade-in observer
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+// Checklist toggle
+function toggle(el) {
+  el.classList.toggle('checked');
+}
+
+// TOC active highlight (simple scroll spy)
+const sections = document.querySelectorAll('.section-anchor');
+const links = document.querySelectorAll('.toc-link');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 80) current = s.id;
+  });
+  links.forEach(l => {
+    l.style.color = l.getAttribute('href') === '#' + current ? 'var(--cyan)' : '';
+    l.style.borderBottomColor = l.getAttribute('href') === '#' + current ? 'var(--cyan)' : 'transparent';
+  });
+}, { passive: true });
+</script>
+</body>
+</html>

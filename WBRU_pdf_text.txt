@@ -1,0 +1,624 @@
+
+--- PAGE 1 ---
+WBRU 模组规格书
+文档版本: 20260123
+查看在线版本
+
+--- PAGE 2 ---
+目录
+目录
+1. 产品概述 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+1.1. 特性 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+1.2. 应用领域 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+2. 模组接口 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+2.1. 尺寸封装 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+2.2. 引脚定义 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 3
+3. 电气参数 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+3.1. 绝对电气参数 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+3.2. 工作条件 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+3.3. 射频功耗 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+3.4. 工作功耗 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+4. 射频参数 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+4.1. 基本射频特性 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+4.2. 发射性能 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 9
+5. 天线信息 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+5.1. 天线类型 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+5.2. 降低天线干扰 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+6. 上电下电时序 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+6.1. 上电时序 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+6.2. 下电时序 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+7. 封装信息及生产指导 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+7.1. 机械尺寸 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14
+7.2. PCB 推荐封装 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+7.3. 生产指南 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+7.4. 推荐炉温曲线 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+7.5. 储存条件 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+8. 模组 MOQ 与包装信息 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+9. 附录：声明 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24
+I
+
+--- PAGE 3 ---
+1 产品概述
+WBRU 是由涂鸦智能开发的一款低功耗嵌入式 Wi-Fi+蓝牙模组。它由一个高集成度的无线射频
+芯片 W701-VA2-CG 构成，内置了 Wi-Fi 网络协议栈和丰富的库函数。
+1 / 26
+
+--- PAGE 4 ---
+1 产品概述
+1. 产品概述
+WBRU 还包含低功耗的 KM4 MCU、WLAN MAC、1T1R WLAN，最高主频 100MHz，内置
+256K SRAM，芯片内置 2Mbyte flash 和丰富的外设资源。
+WBRU 是一个 RTOS 平台，集成了所有 Wi-Fi MAC 以及 TCP/IP 协议的函数库。用户可以基于
+这些开发满足自己需求的嵌入式 Wi-Fi 产品。
+1.1. 特性
+• 内置低功耗 KM4 MCU，可以兼作应用处理器
+• 主频 100MHz
+• 工作电压：3V-3.6V
+• 外设：14×GPIOs、1×UART 和 1×Log_Tx
+• Wi-Fi 和蓝牙连通性：
+• 802.11 B/G/N20
+• 通道 1-14@2.4GHz(CH1-11 for US/CA，CH1-13 for EU/CN)
+• 支持 WPA2/WPA2 PSK（AES）安全模式
+• 支持 Bluetooth 4.2 Low Energy
+• 802.11b 模式下 +20dBm 的输出功率
+• 支持 Wi-Fi 快连配网功能（包括 Android 和 iOS 设备）
+• 板载 PCB Onboard 天线
+• 通过 CE 和 FCC 认证
+• 工作温度：-20℃ 到 85℃
+1.2. 应用领域
+• 智能楼宇
+• 智慧家居/家电
+• 智能插座、智慧灯
+• 工业无线控制
+• 婴儿监控器
+• 网络摄像头
+• 智能公交
+2 / 26
+
+--- PAGE 5 ---
+2.3 模组接口
+2. 模组接口
+2.1. 尺寸封装
+WBRU 共有 3 排引脚，两侧引脚间距为 1.4mm，底部引脚间距为 1.8mm。
+WBRU 尺寸大小：15.8±0.35 mm (W)×20.3±0.35 mm (L) ×2.7±0.15 mm (H)。WBRU尺
+寸图如下图所示：
+2.2. 引脚定义
+引脚 符号 I/O 类型 功能
+1 PA8 I/O
+GPIOA_8，普通
+GPIO，可以复用为
+SPI_SCK，IC Pin22
+2 PA9 I/O
+GPIOA_9，普通
+GPIO，可以复用为
+SPI_MOSI，IC Pin23
+3 PA2 I/O
+GPIOA_2，硬件
+PWM，IC Pin18
+3 / 26
+
+--- PAGE 6 ---
+3.3 电气参数
+引脚 符号 I/O 类型 功能
+4 PA3 I/O
+GPIOA_3，硬件
+PWM，IC Pin19
+5 PA4 I/O
+GPIOA_4，硬件
+PWM，IC Pin20
+6 L_RX I/O
+GPIOA_15，
+UART_Log_RXD（用
+于接收模组外部日志
+信息） ，可配置成普
+通 GPIO
+7 L_TX I/O
+GPIOA_16，
+UART_Log_TXD（用
+于发送模组内部日志
+信息） ，可配置成普
+通 GPIO
+8 PA11 I/O
+GPIOA_11，硬件
+PWM，IC Pin25
+9 PA12 I/O
+GPIOA_12，硬件
+PWM，IC Pin26
+10 PA17 I/O
+GPIOA_17，硬件
+PWM，IC Pin38
+11 PA18 I/O
+GPIOA_18，硬件
+PWM，IC Pin39
+12 PA19 I/O
+GPIOA_19，硬件
+PWM，IC Pin40
+13 GND P 电源参考地
+14 VCC P
+模组电源引脚
+（3.3V）
+15 TX I/O
+GPIOA_14，
+UART0_TXD（用户
+数据串口）
+16 RX I/O
+GPIOA_13，
+UART0_RXD（用户
+数据串口）
+4 / 26
+
+--- PAGE 7 ---
+3.3 电气参数
+引脚 符号 I/O 类型 功能
+17 PA20 I/O
+GPIOA_20，普通
+GPIO，IC Pin1
+18 EN I/O
+模组使能引脚，高电
+平有效，模组已上拉
+高电平，用户可外部
+控制该引脚
+19 PA0 I/O
+GPIOA_0，外部不建
+议上拉，上拉后会进
+入测试模式，IC
+Pin15
+20 PA10 I/O
+GPIOA_10，普通
+GPIO，可以复用为
+SPI_MISO，IC Pin24
+21 PA7 I/O
+GPIOA_7，普通
+GPIO，可以复用为
+SPI_CS，IC Pin21
+说明： P  表示电源引脚，I/O 表示输入输出引脚。
+5 / 26
+
+--- PAGE 8 ---
+3.3 电气参数
+3. 电气参数
+3.1. 绝对电气参数
+参数 描述 最小值 最大值 单位
+Ts 存储温度 −40 125 ℃
+VDD 供电电压 −0.3 3.6 V
+静电释放电压
+（人体模型）
+TAMB-25℃ - 2 KV
+静电释放电压
+（机器模型）
+TAMB-25℃ - 0.5 KV
+3.2. 工作条件
+参数 描述 最小值 典型值 最大值 单位
+Ta 工作温度 −20 - 85 ℃
+VDD 工作电压 3.0 - 3.6 V
+VIL
+IO 低电平输
+入
+- - 0.8 V
+VIH
+IO 高电平输
+入
+2.0 - - V
+VOL
+IO 低电平输
+出
+- - 0.4 V
+VOH
+IO 高电平输
+出
+2.4 - - V
+Imax IO 驱动电流 - - 16 mA
+Cpad
+输入引脚电
+容
+- 2 - pF
+3.3. 射频功耗
+TX 连续发送时功耗：
+符号 模式 功率 平均值
+峰值（典型
+值）
+单位
+IRF 11b 11Mbps 17dBm 217 268 mA
+6 / 26
+
+--- PAGE 9 ---
+4.4 射频参数
+符号 模式 功率 平均值
+峰值（典型
+值）
+单位
+IRF 11b 11Mbps 18dBm 231 283 mA
+IRF 11g 54Mbps 15dBm 159 188 mA
+IRF 11g 54Mbps 17.5dBm 177 213 mA
+IRF
+11n BW20
+MCS7
+13dBm 145 167 mA
+IRF
+11n BW20
+MCS7
+16.5dBm 165 193 mA
+RX 连续接收时功耗：
+符号 模式 平均值 峰值（典型值） 单位
+IRF 11B 11M 63 65 mA
+IRF 11G 54M 65 67 mA
+IRF 11N HT20 MCS7 65 67 mA
+3.4. 工作功耗
+工作模式
+工作状态，
+TA=25℃
+平均值 峰值（典型值） 单位
+快连配网状态
+（蓝牙配网）
+模组处于快连配
+网状态，Wi-Fi
+指示灯快闪
+61 272 mA
+快连配网状态
+（AP 配网）
+模组处于热点配
+网状态，Wi-Fi
+指示灯慢闪
+59 272 mA
+快连配网状态
+（AP 配网）
+模组处于快连配
+网状态，Wi-Fi
+指示灯快闪
+62 280 mA
+网络连接空闲状
+态
+模组处于联网工
+作状态，Wi-Fi
+指示灯常亮
+51 260 mA
+网络连接操作状
+态
+模组处于联网工
+作状态，Wi-Fi
+指示灯常亮
+59 268 mA
+7 / 26
+
+--- PAGE 10 ---
+4.5 射频参数
+工作模式
+工作状态，
+TA=25℃
+平均值 峰值（典型值） 单位
+弱网连接状态
+模组和热点处于
+弱网连接状态，
+Wi-Fi 指示灯常
+亮
+62 264 mA
+网络断连状态
+模组处于断网工
+作状态，Wi-Fi
+指示灯常灭
+57 268 mA
+模组 Disable 状
+态
+模组处于 EN 拉
+低状态
+1.5 1.6 mA
+8 / 26
+
+--- PAGE 11 ---
+4.5 射频参数
+4. 射频参数
+4.1. 基本射频特性
+参数项 详细说明
+频率范围 2.400~2.4835GHz
+Wi-Fi 标准 IEEE 802.11b/g/n（通道 1-14）
+蓝牙标准 蓝牙 4.2
+数据传输速率 11b：1、2、5.5、11 Mbps
+数据传输速率
+11g：6、9、12、18、24、36、48、54
+Mbps
+数据传输速率 11n：HT20 MCS0-7
+天线类型 PCB 天线，增益 1.16dBi
+4.2. 发射性能
+TX 连续发送性能：
+参数项 最小值 典型值 最大值 单位
+RF 平均输出功
+率，802.11b
+CCK Mode 1M
+- 17.5 - dBm
+RF 平均输出功
+率，802.11g
+OFDM Mode
+54M
+- 14.5 - dBm
+RF 平均输出功
+率，802.11n
+OFDM Mode
+MCS7
+- 13.5 - dBm
+RF 平均输出功
+率，蓝牙 4.2 1M
+- 6.5 - dBm
+频率误差 −20 - 20 ppm
+EVM@802.11b
+CCK 11Mbps
+Mode 17.5dBm
+- - −10 dB
+9 / 26
+
+--- PAGE 12 ---
+5.3 天线信息
+参数项 最小值 典型值 最大值 单位
+EVM@802.11g
+OFDM 54Mbps
+Mode 14.5dBm
+- - −29 dB
+EVM@802.11n
+OFDM MCS7
+Mode 13.5dBm
+- - −30 dB
+接收性能：
+参数项 最小值 典型值 最大值 单位
+PER<8%，RX 灵
+敏度，802.11b
+CCK Mode 1M
+- −97 - dBm
+PER<10%，RX
+灵敏度，
+802.11g OFDM
+Mode 54M
+- −75 - dBm
+PER<10%，RX
+灵敏度，
+802.11n OFDM
+Mode MCS7
+- −72 - dBm
+PER<10%，RX
+灵敏度， 蓝牙
+4.2 1M
+- −93 - dBm
+10 / 26
+
+--- PAGE 13 ---
+5.3 天线信息
+5. 天线信息
+5.1. 天线类型
+只有 PCB 板载天线接入方式，天线增益 1.16dBi。
+5.2. 降低天线干扰
+在 Wi-Fi 模组上使用 PCB 板载天线时，为确保 Wi-Fi 性能的最优化，建议模组天线部分和其他
+金属件距离至少在 15mm 以上。
+11 / 26
+
+--- PAGE 14 ---
+6.3 上电下电时序
+6. 上电下电时序
+6.1. 上电时序
+W701 芯片对上电时序有要求，建议 3.3V 电压从 0V 爬升到 3.3V 的时间在 20ms 之内。
+6.2. 下电时序
+Symbol 参数 最小值 典型值 最大值 单位
+TPRDY
+3.3V ready
+time
+0.6 - 20 ms
+CHIP_EN
+CHIP_EN
+ready time
+0.6 - 20 ms
+12 / 26
+
+--- PAGE 15 ---
+7.3 封装信息及生产指导
+Symbol 参数 最小值 典型值 最大值 单位
+VBOR
+BOR occurs
+after 3.3V is
+lower than
+this voltage
+2 - - V
+TRST
+The
+required
+time that
+3.3V is lower
+than VBOR
+1 - - ms
+13 / 26
+
+--- PAGE 16 ---
+7.3 封装信息及生产指导
+7. 封装信息及生产指导
+7.1. 机械尺寸
+WBRU 的 PCB 机械尺寸大小：15.8±0.35 mm (W)×20.3±0.35 mm (L) ×1.0±0.1 mm (H)。
+WBRU 的机械尺寸如下图所示。
+14 / 26
+
+--- PAGE 17 ---
+8.2 模组 MOQ 与包装信息
+15 / 26
+
+--- PAGE 18 ---
+8.2 模组 MOQ 与包装信息
+说明：默认的尺寸公差为 ± 0.35mm，关键尺寸如果客户有明确要求，请沟通
+后在规格书中进行明确的标定。
+7.2. PCB 推荐封装
+WBRU 原理图引脚对应图：
+16 / 26
+
+--- PAGE 19 ---
+8.3 模组 MOQ 与包装信息
+WBRU PCB 封装：
+17 / 26
+
+--- PAGE 20 ---
+8.3 模组 MOQ 与包装信息
+上图中 keep-out 示意区域，不需要上锡，不要走线。
+7.3. 生产指南
+1. 涂鸦出厂的可贴可插封装模组根据客户底板设计方案选择组装方式，底板设计为贴片封装
+时使用 SMT 贴片制程进行生产，如果底板设计为插件封装时使用波峰焊制程进行生产。模
+组产品拆开包装后建议在 24 小时内完成焊接，否则需放置在湿度不超过 10%RH 的干燥柜
+内，或重新进行真空包装并记录暴露时间，总暴露时间不超过 168 小时。
+• （SMT 制程）SMT 贴片所需仪器或设备：
+18 / 26
+
+--- PAGE 21 ---
+8.4 模组 MOQ 与包装信息
+• 贴片机
+• SPI
+• 回流焊
+• 炉温测试仪
+• AOI
+• （波峰焊制程）波峰焊所需的仪器或设备：
+• 波峰焊设备
+• 波峰焊接治具
+• 恒温烙铁
+• 锡条、锡丝、助焊剂
+• 炉温测试仪
+• 烘烤所需仪器或设备：
+• 柜式烘烤箱
+• 防静电耐高温托盘
+• 防静电耐高温手套
+2. 涂鸦出厂的模组存储条件如下：
+• 防潮袋必须储存在温度 ＜40℃、湿度 ＜90%RH 的环境中。
+• 干燥包装的产品，保质期为从包装密封之日起 12 个月的时间。
+• 密封包装内装有湿度指示卡：
+3. 涂鸦出厂的模组当出现可能受潮的情况下需要进行烘烤：
+• 拆封前发现真空包装袋破损。
+• 拆封后发现包装袋内没有湿度指示卡。
+• 拆封后如果湿度指示卡读取到 10% 及以上色环变为粉色。
+• 拆封后总暴露时间超过 168 小时。
+• 从首次密封包装之日起超过 12 个月。
+4. 烘烤参数如下：
+• 烘烤温度：卷盘包装 40℃，小于等于 5%RH。托盘包装 125℃，小于等于 5%RH（耐高温
+托盘非吸塑盒拖盘） 。
+19 / 26
+
+--- PAGE 22 ---
+8.4 模组 MOQ 与包装信息
+• 烘烤时间：卷盘包装 168 小时，托盘包装 12 小时。
+• 报警温度设定：卷盘包装 50℃，托盘包装 135℃。
+• 自然条件下冷却到 36℃ 以下后，即可进行生产。
+• 若烘烤后暴露时间大于 168 小时没有使用完，请再次进行烘烤。
+• 如果暴露时间超过 168 小时未经过烘烤，不建议使用波峰焊接工艺焊接此批次模组，因模
+组为 3 级湿敏器件超过允许的暴露时间很可能受潮，进行高温焊接时可能导致器件失效或
+焊接不良。
+5. 在整个生产过程中请对模组进行静电放电（ESD）保护。
+6. 为了确保产品合格率，建议使用 SPI 和 AOI 测试设备来监控锡膏印刷和贴装品质。
+7.4. 推荐炉温曲线
+请根据制程选择相应的焊接方式，SMT 参考回流焊接炉温曲线推荐，波峰焊制程参考波峰焊
+接炉温曲线推荐。设定炉温与实测炉温有一定差距，本文所示温度均为实测温度。
+方式一：SMT 制程（SMT 回流焊接推荐炉温曲线）
+请参考回流焊炉温曲线要求进行炉温设定，回流焊温度曲线如下图所示：
+• A：温度轴
+• B：时间轴
+• C：合金液相线温度区间为 217-220℃
+• D：升温斜率为 1-3℃/S
+20 / 26
+
+--- PAGE 23 ---
+8.5 模组 MOQ 与包装信息
+• E：恒温时间为 60-120S，恒温温度区间为 150-200℃
+• F：液相线以上时间为 50-70S
+• G：峰值温度为 235-245℃
+• H：降温斜率为 1-4℃/S
+注意：以上推荐曲线以 SAC305 合金焊膏为例。其他合金焊膏请按焊膏规格书推
+荐炉温曲线设置。
+方式二：波峰焊制程（波峰焊接炉温曲线）
+请参考波峰焊接炉温建议进行炉温设定，峰值温度 260℃±5℃，波峰焊接温度曲线如下图所
+示：
+波峰焊接炉温曲线建
+议
+手工补焊温度建议
+预热温度 80-130℃ 焊接温度 360℃±20℃
+预热时间 75-100S 焊接时间 小于 3S/点
+波峰接触时间 3-5S NA NA
+锡缸温度 260±5℃ NA NA
+升温斜率 ≤2℃/S NA NA
+21 / 26
+
+--- PAGE 24 ---
+8.5 模组 MOQ 与包装信息
+波峰焊接炉温曲线建
+议
+手工补焊温度建议
+降温斜率 ≤6℃/S NA NA
+7.5. 储存条件
+22 / 26
+
+--- PAGE 25 ---
+8.6 模组 MOQ 与包装信息
+8. 模组 MOQ 与包装信息
+产品型号 MOQ（pcs） 出货包装方式
+每个卷盘存放模
+组数
+每箱包装卷盘数
+WBRU 4400 载带卷盘 1100 4
+23 / 26
+
+--- PAGE 26 ---
+9 附录：声明
+9. 附录：声明
+FCC Caution: Any changes or modifications not expressly approved by the party
+responsible for compliance could void the user’s authority to operate this device.
+This device complies with Part 15 of the FCC Rules. Operation is subject to the following
+two conditions: (1) This device may not cause harmful interference, and (2) this device
+must accept any interference received, including interference that may cause undesired
+operation.
+Note: This device has been tested and found to comply with the limits for a Class B
+digital device, according to part 15 of the FCC Rules. These limits are designed to provide
+reasonable protection against harmful interference in a residential installation. This
+device generates, uses, and can radiate radio frequency energy and, if not installed and
+used following the instructions, may cause harmful interference to radio
+communications. However, there is no guarantee that interference will not occur in a
+particular installation.
+If this device does cause harmful interference to radio or television reception, which can
+be determined by turning the device off and on, the user is encouraged to try to correct
+the interference by one or more of the following measures:
+• Reorient or relocate the receiving antenna.
+• Increase the separation between the device and receiver.
+• Connect the device to an outlet on a circuit different from that to which the receiver is
+connected.
+• Consult the dealer or an experienced radio/TV technician for help.
+Radiation Exposure Statement
+This device complies with FCC radiation exposure limits set forth for an uncontrolled
+rolled environment. This device should be installed and operated with a minimum
+distance of 20cm between the radiator and your body.
+Important Note
+This radio module must not be installed to co-locate and operate simultaneously with
+other radios in the host system except following FCC multi-transmitter product
+procedures. Additional testing and device authorization may be required to operate
+simultaneously with other radios.
+24 / 26
+
+--- PAGE 27 ---
+The availability of some specific channels and/or operational frequency bands are
+country dependent and are firmware programmed at the factory to match the intended
+destination. The firmware setting is not accessible by the end-user.
+The host product manufacturer is responsible for compliance with any other FCC rules
+that apply to the host not covered by the modular transmitter grant of certification. The
+final host product still requires Part 15 Subpart B compliance testing with the modular
+transmitter installed.
+The end-user manual shall include all required regulatory information/warnings as
+shown in this manual, including “This product must be installed and operated with a
+minimum distance of 20 cm between the radiator and user body”.
+This device has got an FCC ID: 2ANDL-WBRU. The end product must be labeled in a visible
+area with the following: “Contains Transmitter Module FCC ID: 2ANDL-WBRU”.
+This device is intended only for OEM integrators under the following conditions:
+The antenna must be installed such that 20cm is maintained between the antenna and
+users, and the transmitter module may not be co-located with any other transmitter or
+antenna.
+As long as the 2 conditions above are met, further transmitter tests will not be required.
+However, the OEM integrator is still responsible for testing their end-product for any
+additional compliance requirements required with this module installed.
+Declaration of Conformity European Notice
+Hereby, Hangzhou Tuya Information Technology Co., Ltd declares that this module
+product is in compliance with essential requirements and other relevant provisions of
+Directive 2014/53/EU,2011/65/EU. A copy of the Declaration of conformity can be found
+at https://www.tuya.com.
+25 / 26
+
+--- PAGE 28 ---
+This product must not be disposed of as normal household waste, in accordance with
+the EU directive for waste electrical and electronic equipment (WEEE-2012/19/EU).
+Instead, it should be disposed of by returning it to the point of sale, or to a municipal
+recycling collection point.
+The device could be used with a separation distance of 20cm to the human body.
+26 / 26

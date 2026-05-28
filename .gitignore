@@ -1,0 +1,16 @@
+.DS_Store
+
+# Local Tuya credentials
+firmware/t5_tuya_cct_app/secrets.h
+
+# Arduino / build outputs
+build/
+*.bin
+*.elf
+*.map
+*.hex
+*.uf2
+
+# Editor noise
+.vscode/
+.idea/
