@@ -23,8 +23,8 @@ extern "C" {
 #include "tkl_pwm.h"
 }
 
-const int WW_PIN = 24;
-const int CW_PIN = 25;
+const int WW_PIN = 25;
+const int CW_PIN = 24;
 
 const unsigned long PWM_FREQ_HZ = 200; // Within current prototype MOSFET module limit.
 const unsigned long PWM_CYCLE = 10000; // Tuya PWM duty scale: duty / cycle.
@@ -51,6 +51,7 @@ int cwDuty = 0;
 TUYA_PWM_NUM_E wwPwmNum = TUYA_PWM_NUM_MAX;
 TUYA_PWM_NUM_E cwPwmNum = TUYA_PWM_NUM_MAX;
 bool pwmReady = false;
+bool digitalOverrideActive = false;
 
 void tuyaIoTEventCallback(tuya_event_msg_t *event);
 void buttonCheck(void);
@@ -59,6 +60,8 @@ void processSerialCommand(char *cmd);
 void printSerialHelp(void);
 void printCurrentState(void);
 void setDirectPwm(int wwPercent, int cwPercent);
+void setDigitalOverride(int pin, bool high);
+void clearDigitalOverride(void);
 void printDpDebugValue(tuya_event_msg_t *event, uint8_t dpid);
 
 bool isSwitchDp(uint8_t dpid)
@@ -149,7 +152,7 @@ void initPwmOutputs()
 
 void updatePwmOutputs()
 {
-  if (!pwmReady) {
+  if (!pwmReady || digitalOverrideActive) {
     return;
   }
 
@@ -157,8 +160,41 @@ void updatePwmOutputs()
   tkl_pwm_duty_set(cwPwmNum, percentToPwmDuty(cwDuty));
 }
 
+void clearDigitalOverride()
+{
+  if (!digitalOverrideActive) {
+    return;
+  }
+
+  digitalOverrideActive = false;
+  initPwmOutputs();
+  updatePwmOutputs();
+  Serial.println("Digital override cleared, PWM restored.");
+}
+
+void setDigitalOverride(int pin, bool high)
+{
+  digitalOverrideActive = true;
+
+  if (pwmReady) {
+    tkl_pwm_stop(wwPwmNum);
+    tkl_pwm_stop(cwPwmNum);
+  }
+
+  pinMode(WW_PIN, OUTPUT);
+  pinMode(CW_PIN, OUTPUT);
+  digitalWrite(WW_PIN, LOW);
+  digitalWrite(CW_PIN, LOW);
+  digitalWrite(pin, high ? HIGH : LOW);
+
+  Serial.print("Digital override: P");
+  Serial.print(pin);
+  Serial.println(high ? "=HIGH" : "=LOW");
+}
+
 void setDirectPwm(int wwPercent, int cwPercent)
 {
+  clearDigitalOverride();
   powerOn = true;
   wwDuty = clampPercent(wwPercent);
   cwDuty = clampPercent(cwPercent);
@@ -200,6 +236,9 @@ void printSerialHelp()
   Serial.println("  ww <0-100>       - direct PWM test: P24 warm only");
   Serial.println("  cw <0-100>       - direct PWM test: P25 cold only");
   Serial.println("  mix <ww> <cw>    - direct PWM test: set P24/P25 duty percent");
+  Serial.println("  p24hi / p24lo    - force P24 digital output high/low, PWM disabled");
+  Serial.println("  p25hi / p25lo    - force P25 digital output high/low, PWM disabled");
+  Serial.println("  pwm              - restore PWM after digital override");
 }
 
 void processSerialCommand(char *cmd)
@@ -251,6 +290,16 @@ void processSerialCommand(char *cmd)
     setDirectPwm(0, valueA);
   } else if (sscanf(cmd, "mix %d %d", &valueA, &valueB) == 2) {
     setDirectPwm(valueA, valueB);
+  } else if (strcmp(cmd, "p24hi") == 0) {
+    setDigitalOverride(WW_PIN, true);
+  } else if (strcmp(cmd, "p24lo") == 0) {
+    setDigitalOverride(WW_PIN, false);
+  } else if (strcmp(cmd, "p25hi") == 0) {
+    setDigitalOverride(CW_PIN, true);
+  } else if (strcmp(cmd, "p25lo") == 0) {
+    setDigitalOverride(CW_PIN, false);
+  } else if (strcmp(cmd, "pwm") == 0) {
+    clearDigitalOverride();
   } else {
     Serial.print("Unknown serial command: ");
     Serial.println(cmd);
