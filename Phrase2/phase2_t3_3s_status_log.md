@@ -1,211 +1,220 @@
-# Phase 2 T3-3S PCB Status Log
+# Phase 2 T3-3S PCB 状态记录表
 
-> Updated: 2026-06-08  
-> Purpose: one place to record daily progress, decisions, risks, changes, and bring-up evidence.
+> 更新日期：2026-06-08
+> 用途：集中记录每日进展、评审结论、变更、问题和上电测试证据。项目负责人可以直接用它跟实习生开会。
 
-## 1. Current Baseline
+## 阅读说明
 
-| Item | Baseline |
+这份文件是“项目日志 + 测试记录模板”。没有证据的口头结论不要写成已完成；请尽量填写文件名、照片、截图、视频或仪器读数。
+
+## 1. 当前基线
+
+| 项目 | 当前基线 |
 |---|---|
-| Board target | T3-3S + 12/24V dual-channel CCT low-side MOSFET PCB |
-| PM/reviewer | Project lead |
-| PCB implementer | Department intern / PCB engineer |
-| Input | 12V/24V DC only |
-| Output | `LED+`, `WW-`, `CW-` |
-| PWM mapping | `P24 -> WW`, `P32 -> CW` |
-| Debug/test points | `3V3`, `GND`, `TX1`, `RX1`, `CEN`, `P24`, `P32` |
-| Out of scope | 220V AC, 48V, Zigbee, extreme miniaturization, mass-production optimization |
+| 首板目标 | T3-3S + 12/24V 双路双色温 CCT 低边 MOSFET 控制 PCB |
+| 项目负责人 / 评审人 | 项目负责人 |
+| PCB 实施人 | 部门新实习生 / PCB 工程师 |
+| 输入 | 只支持 12V/24V DC |
+| 输出 | `LED+`、`WW-`、`CW-` |
+| PWM 映射 | `P24 -> WW`，`P32 -> CW` |
+| 调试 / 测试点 | `3V3`、`GND`、`TX1`、`RX1`、`CEN`、`P24`、`P32` |
+| 不做的范围 | 220V AC、48V、Zigbee、极限小型化、量产成本优化 |
 
-## 2. Daily Standup Template
+## 2. 每日站会模板
 
 ```text
-Date:
-Yesterday:
-Today:
-Blocked by:
-Decision needed from PM:
-Biggest technical risk today:
-Artifacts updated:
+日期：
+昨天完成：
+今天计划：
+当前卡点：
+需要负责人决定：
+今天最大技术风险：
+已更新材料：
 ```
 
-## 3. Formal Review Log
+## 3. 正式评审记录
 
-| Date | Review gate | Decision | Required rework | Owner | Due |
+| 日期 | 评审阶段 | 结论 | 需要返工 / 补充 | 负责人 | 截止时间 |
 |---|---|---|---|---|---|
-| 2026-06-08 | Plan implementation | Phase 2 schedule/checklist/status docs created | Start Week 1 Day 1 kickoff with intern | PM | Week 1 Day 1 |
+| 2026-06-08 | 计划落地 | Phase 2 排期、检查清单、状态记录表已建立 | 与实习生启动第1周第1天启动会 | 项目负责人 | 第1周第1天 |
 
-## 4. Change Log
+## 4. 变更记录
 
-| Date | Change | Reason | Impacted tests | Approved by |
+| 日期 | 变更内容 | 变更原因 | 影响的测试 | 批准人 |
 |---|---|---|---|---|
-| 2026-06-08 | T3-3S locked as Phase 2 Wi-Fi module | Phase 2 module decision completed | Schematic, footprint, pin map, layout antenna keep-out | PM |
-| 2026-06-08 | First board scope locked to 12/24V dual CCT | Keep v0.1 bring-up tractable | Power, MOSFET, LED load, thermal tests | PM |
+| 2026-06-08 | Phase 2 Wi-Fi 模组锁定为 T3-3S | Phase 2 模组选型已完成 | 原理图、封装、引脚分配表、天线禁布区 | 项目负责人 |
+| 2026-06-08 | 首板范围锁定为 12/24V 双路 CCT | 控制 v0.1 难度，优先完成可调试样板 | 电源、MOSFET、LED 负载、温升测试 | 项目负责人 |
 
-## 5. Issue Log
+## 5. 问题清单
 
-| ID | Date | Issue | Severity | Owner | Status | Resolution |
+| ID | 日期 | 问题 | 严重程度 | 负责人 | 状态 | 处理方式 |
 |---|---|---|---|---|---|---|
-| P2-001 | 2026-06-08 | T3-3S App/firmware path may lag behind PCB bring-up | Medium | PM/software | Open | Use local PWM test firmware for hardware validation if App DP mapping is not ready |
-| P2-002 | 2026-06-08 | 24V power source must be safe and current-limited before bring-up | High | PM/lab | Open | Prepare safe 24V supply before Week 4 |
-| P2-003 | 2026-06-08 | T3-3S antenna layout can be degraded by copper, metal, or switching power placement | High | PCB engineer | Open | Enforce datasheet footprint and antenna keep-out review before routing |
+| P2-001 | 2026-06-08 | T3-3S App / 固件路径可能晚于 PCB 上电测试 | 中 | 项目负责人 / 软件 | 未关闭 | 如果 App 控制数据点（DP）映射没准备好，先用本地 PWM 测试固件验证硬件 |
+| P2-002 | 2026-06-08 | 24V 上电前必须准备安全、可限流的电源 | 高 | 项目负责人 / 实验室 | 未关闭 | 第4周前准备可靠 24V 电源 |
+| P2-003 | 2026-06-08 | T3-3S 天线可能被覆铜、金属件或开关电源干扰 | 高 | PCB 工程师 | 未关闭 | PCB 布局前强制检查规格书封装和天线禁布区 |
 
-## 6. Week 1 Log
+## 6. 第1周记录
 
-### Day 1 Kickoff
-
-```text
-Date:
-Attendees:
-Phase 1 facts explained:
-Scope confirmed:
-Out-of-scope confirmed:
-Open questions:
-Artifacts received from intern:
-PM decision:
-```
-
-### Day 2-3 Schematic Draft
+### 第1天 启动会
 
 ```text
-Date:
-Schematic version:
-Pin map version:
-T3-3S symbol checked:
-PWM mapping checked:
-Test points checked:
-Open schematic issues:
-PM decision:
+日期：
+参会人：
+已讲清的 Phase 1 事实：
+已确认范围：
+已确认不做的范围：
+待确认问题：
+实习生已提交材料：
+负责人结论：
 ```
 
-### Day 4-5 Power/MOSFET/BOM Review
+### 第2-3天 原理图初版
 
 ```text
-Date:
-BOM version:
-Buck selected:
-MOSFET selected:
-Protection/filtering selected:
-Datasheets attached:
-Open BOM issues:
-PM decision:
+日期：
+原理图版本：
+引脚分配表版本：
+T3-3S 原理图符号是否检查：
+PWM 映射是否检查：
+测试点是否检查：
+未关闭原理图问题：
+负责人结论：
 ```
 
-## 7. Week 2 Log
-
-### Day 1-2 Placement Review
+### 第4-5天 电源 / MOSFET / BOM 评审
 
 ```text
-Date:
-PCB version:
-T3-3S antenna placement:
-Antenna keep-out:
-Buck/MOSFET placement:
-Connector placement:
-Open placement issues:
-PM decision:
+日期：
+BOM 版本：
+Buck 型号：
+MOSFET 型号：
+保护 / 滤波方案：
+是否附规格书：
+未关闭 BOM 问题：
+负责人结论：
 ```
 
-### Day 3-4 Routing Review
+## 7. 第2周记录
+
+### 第1-2天 器件摆放评审
 
 ```text
-Date:
-PCB version:
-VIN/GND routing:
-LED current routing:
-Buck switching loop:
-MOSFET thermal copper:
-Test point access:
-DRC/ERC status:
-Open routing issues:
-PM decision:
+日期：
+PCB 版本：
+T3-3S 天线位置：
+天线禁布区：
+Buck / MOSFET 位置：
+端子位置：
+未关闭摆放问题：
+负责人结论：
 ```
 
-### Day 5 Gerber Release
+### 第3-4天 走线评审
 
 ```text
-Date:
-Schematic PDF:
-PCB screenshots:
-BOM:
-Pick/place:
-Gerber:
-Assembly drawing:
-Issue log status:
-Release decision:
+日期：
+PCB 版本：
+VIN/GND 走线：
+LED 大电流走线：
+Buck 开关回路：
+MOSFET 散热铜皮：
+测试点可触达性：
+设计规则/电气规则检查状态：
+未关闭走线问题：
+负责人结论：
 ```
 
-## 8. Week 3 Log
+### 第5天 Gerber 发布
 
 ```text
-Date:
-Board fabrication status:
-Components ordered:
-Tools ready:
-12V supply ready:
-24V supply ready:
-Logic analyzer ready:
-Soldering plan:
-Open lab prep issues:
+日期：
+原理图 PDF：
+PCB 截图：
+BOM：
+贴片坐标：
+Gerber：
+装配图：
+问题清单状态：
+是否批准发板：
 ```
 
-## 9. Week 4 Bring-Up Records
+## 8. 第3周记录
 
-### Assembly and Visual Inspection
+```text
+日期：
+打板状态：
+元器件采购状态：
+焊接工具是否准备：
+12V 电源是否准备：
+24V 电源是否准备：
+逻辑分析仪是否准备：
+焊接计划：
+未关闭实验室准备问题：
+```
 
-| Check | Result | Notes |
+## 9. 第4周上电测试记录
+
+### 焊接和目检
+
+| 检查项 | 结果 | 备注 |
 |---|---|---|
-| T3-3S orientation |  |  |
-| Buck orientation |  |  |
-| MOSFET orientation |  |  |
-| Connector polarity |  |  |
-| Solder bridges |  |  |
-| `VIN+` to `VIN-` resistance |  |  |
-| `3V3` to `GND` resistance |  |  |
+| T3-3S 方向 |  |  |
+| Buck 方向 |  |  |
+| MOSFET 方向 |  |  |
+| 端子极性 |  |  |
+| 是否有焊桥 |  |  |
+| `VIN+` 到 `VIN-` 电阻 |  |  |
+| `3V3` 到 `GND` 电阻 |  |  |
 
-### 12V Power Test
+### 12V 上电测试
 
-| Measurement | Expected | Actual | Pass/Fail |
+| 测量项 | 期望值 | 实测值 | 通过 / 失败 |
 |---|---:|---:|---|
-| VIN | about 12V |  |  |
-| 3V3 | 3.3V +/- tolerance |  |  |
-| Board input current | no runaway |  |  |
-| T3-3S temperature | no abnormal heat |  |  |
-| Buck temperature | no abnormal heat |  |  |
+| VIN | 约 12V |  |  |
+| 3V3 | 3.3V，允许在器件规格范围内 |  |  |
+| 整板输入电流 | 无失控上升 |  |  |
+| T3-3S 温度 | 无异常发热 |  |  |
+| Buck 温度 | 无异常发热 |  |  |
 
-### PWM Test
+### PWM 测试
 
-| Signal | Expected | Actual | Evidence |
+| 信号 | 期望结果 | 实测结果 | 证据 |
 |---|---|---|---|
-| P24 | PWM for WW |  |  |
-| P32 | PWM for CW |  |  |
-| WW gate | follows P24 |  |  |
-| CW gate | follows P32 |  |  |
+| P24 | WW 调光 PWM |  |  |
+| P32 | CW 调光 PWM |  |  |
+| WW gate | 跟随 P24 |  |  |
+| CW gate | 跟随 P32 |  |  |
 
-### LED Load Test
+### LED 负载测试
 
-| Test | Expected | Actual | Pass/Fail |
+| 测试项 | 期望结果 | 实测结果 | 通过 / 失败 |
 |---|---|---|---|
-| WW single-channel | Warm channel changes brightness |  |  |
-| CW single-channel | Cool channel changes brightness |  |  |
-| Dual-channel CCT | WW/CW mix changes color temperature |  |  |
-| CCT direction | App or local mapping is known |  |  |
+| WW 单路 | 暖白通道亮度可变化 |  |  |
+| CW 单路 | 冷白通道亮度可变化 |  |  |
+| 双路 CCT | WW/CW 混光后色温可变化 |  |  |
+| 色温方向 | App 或本地映射方向已知 |  |  |
 
-### 24V Power and Thermal Test
+### 24V 上电和温升测试
 
-| Measurement | Start | 10 min | 20 min | 30 min | Notes |
+| 测量项 | 开始 | 10 分钟 | 20 分钟 | 30 分钟 | 备注 |
 |---|---:|---:|---:|---:|---|
 | VIN |  |  |  |  |  |
 | 3V3 |  |  |  |  |  |
-| T3-3S temp |  |  |  |  |  |
-| Buck temp |  |  |  |  |  |
-| WW MOSFET temp |  |  |  |  |  |
-| CW MOSFET temp |  |  |  |  |  |
-| Input connector temp |  |  |  |  |  |
-| LED connector temp |  |  |  |  |  |
+| T3-3S 温度 |  |  |  |  |  |
+| Buck 温度 |  |  |  |  |  |
+| WW MOSFET 温度 |  |  |  |  |  |
+| CW MOSFET 温度 |  |  |  |  |  |
+| 输入端子温度 |  |  |  |  |  |
+| LED 端子温度 |  |  |  |  |  |
 
-## 10. v0.2 Follow-Up List
+## 10. v0.2 后续修改清单
 
-| Priority | Finding | Proposed v0.2 change | Evidence |
+| 优先级 | 发现的问题 | 建议 v0.2 修改 | 证据 |
 |---|---|---|---|
 |  |  |  |  |
 
+## 11. 翻译审核记录
+
+- 已将状态表、问题表和测试记录模板翻译为中文。
+- 保留必须与 PCB 丝印和测试点一致的英文名称，例如 `VIN+`、`3V3`、`P24`、`P32`。
+- 已把“证据意识”写入阅读说明，避免产品评审只停留在口头同步。

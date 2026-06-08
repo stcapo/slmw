@@ -1,212 +1,226 @@
-# Phase 2 T3-3S PCB Schedule and Collaboration Plan
+# Phase 2 T3-3S PCB 排期与协作计划
 
-> Updated: 2026-06-08  
-> Owner: project lead / PM reviewer  
-> PCB engineer: department intern / PCB implementer  
-> Phase 2 target: T3-3S + 12/24V input + dual-channel CCT low-side MOSFET control PCB
+> 更新日期：2026-06-08
+> 项目负责人：产品 / 项目负责人，负责需求冻结和技术评审
+> PCB 工程师：部门新实习生，负责原理图、PCB 布局、BOM、打样文件和样板配合
+> Phase 2 首板目标：`T3-3S + 12/24V 输入 + 双路双色温 CCT 低边 MOSFET 控制 PCB`
 
-## 1. Locked Scope
+## 阅读说明
 
-Phase 2 is a first custom low-voltage control PCB, not a final mass-production board.
+本文面向产品经理和 PCB 工程师共同使用。文中保留少量工程术语，方便和工程文件一致：
 
-In scope:
+- PCB：电路板。
+- Buck：降压电源电路，把 12V/24V 降到 T3-3S 需要的 3.3V。
+- MOSFET：功率开关管，用小信号控制 LED 大电流通断。
+- PWM：调光信号，占空比变化会改变亮度。
+- BOM：物料清单，列出每个元器件型号、数量和供应信息。
+- PCB 布局：元器件摆放和走线设计。
+- Gerber：交给板厂打样的 PCB 生产文件。
+- Keep-out / 禁布区：不能覆铜、走线、放过孔或上锡的区域。
+- WW/CW：暖白 / 冷白两路 LED。
 
-- T3-3S Wi-Fi/BLE module as the Phase 2 main control module.
-- 12V and 24V constant-voltage DC input.
-- 3.3V Buck supply for T3-3S and small-signal circuitry.
-- Two low-side N-MOSFET channels for common-anode CCT LED loads.
-- WW/CW PWM control using T3-3S hardware PWM pins.
-- Test points, readable silkscreen, and bring-up-friendly layout.
-- Gerber, BOM, pick/place file, schematic PDF, PCB screenshots, and bring-up report.
+## 1. 已冻结范围
 
-Out of scope for the first board:
+Phase 2 是第一版自研低压控制 PCB，不是最终量产板。首板目标是先把功能跑通，方便后续再缩小尺寸、降成本、做认证和量产优化。
 
-- 220V AC input or onboard mains AC-DC power.
-- 48V wide-input product version.
-- Zigbee version.
-- Extreme miniaturization.
-- Mass-production cost optimization.
-- Full EMC/certification closure.
+本次要做：
 
-Success criteria:
+- 使用 T3-3S 作为 Phase 2 的 Wi-Fi/BLE 主控模组。
+- 支持 12V 和 24V 恒压直流输入。
+- 板上做 3.3V Buck，给 T3-3S 和小信号电路供电。
+- 做两路低边 N-MOSFET，分别控制双色温灯带的暖白和冷白通道。
+- 使用 T3-3S 的硬件 PWM 引脚做亮度和色温控制。
+- 保留测试点、清晰丝印和足够调试空间，首板优先好测好修。
+- 输出原理图 PDF、BOM、Gerber、贴片坐标、PCB 截图、装配图和上电测试报告。
 
-- 12V and 24V input both produce stable 3.3V.
-- T3-3S powers on and exposes usable UART/debug path.
-- `P24` and `P32` output measurable PWM.
-- WW and CW channels drive a common-anode CCT LED load independently.
-- Brightness and CCT direction are understandable and correctable by mapping or wiring.
-- 12V and 24V tests each run for 30 minutes without abnormal heat, smell, reset, flicker beyond prototype tolerance, or connector/MOSFET/Buck distress.
+本次不做：
 
-## 2. System Architecture
+- 不做 220V 市电输入，也不把 AC-DC 电源做上 PCB。
+- 不做 48V 宽压版本。
+- 不做 Zigbee 版本。
+- 不追求极限小型化。
+- 不做量产成本优化。
+- 不做完整 EMC / 认证闭环。
+
+成功标准：
+
+- 12V 和 24V 输入时，板上都能稳定得到 3.3V。
+- T3-3S 能正常上电，并能预留 UART / 调试入口。
+- `P24` 和 `P32` 能输出可测量的 PWM 信号。
+- 暖白 WW 和冷白 CW 两路能独立驱动共阳双色温 LED。
+- 亮度变化和色温方向可判断；如果方向反了，能通过接线或固件映射修正。
+- 12V 和 24V 各连续运行 30 分钟，没有异常发热、异味、重启、明显失控闪烁、电源异常或端子/MOSFET/Buck 压力过大。
+
+## 2. 系统架构
 
 ```text
-Certified 12V/24V constant-voltage supply
-  -> Phase 2 low-voltage PCB
-      -> input protection/filtering
-      -> 3.3V Buck
-      -> T3-3S
-      -> P24 PWM -> gate resistor -> WW N-MOSFET -> WW-
-      -> P32 PWM -> gate resistor -> CW N-MOSFET -> CW-
-  -> common-anode CCT LED load
-      -> LED+ common positive
-      -> WW- warm channel
-      -> CW- cool channel
+成品认证 12V/24V 恒压电源
+  -> Phase 2 低压控制 PCB
+      -> 输入保护 / 滤波
+      -> 3.3V Buck 降压
+      -> T3-3S 主控模组
+      -> P24 PWM -> 栅极电阻 -> WW 路 N-MOSFET -> WW-
+      -> P32 PWM -> 栅极电阻 -> CW 路 N-MOSFET -> CW-
+  -> 共阳双色温 LED 负载
+      -> LED+ 公共正极
+      -> WW- 暖白负极
+      -> CW- 冷白负极
 ```
 
-Phase 1 facts that must be carried into Phase 2:
+必须从 Phase 1 带入 Phase 2 的事实：
 
-- The CCT LED load is common-anode.
-- Red wire is common positive; yellow is WW negative; white is CW negative.
-- Low-side MOSFET switching is valid for the current load style.
-- 12V/24V power must never be connected directly to a Tuya module GPIO or 3.3V rail.
-- YYNMOS-4/NMOS-4 was a prototype module only; the PCB needs a product-grade MOSFET power stage.
-- 200Hz prototype PWM showed visible flicker risk; the PCB power stage should tolerate a higher PWM target, at least 2kHz for the next firmware target.
+- 当前双色温 LED 负载是共阳结构。
+- 红线是公共正极，黄线是暖白 WW 负极，白线是冷白 CW 负极。
+- 低边 MOSFET 开关方案已经在 Phase 1 验证可行。
+- 12V/24V 只能进功率侧，不能直接接到 T3-3S 的 GPIO、UART、CEN 或 3.3V。
+- YYNMOS-4/NMOS-4 只是 Phase 1 原型模块，不能照搬成量产功率级。
+- Phase 1 的 200Hz PWM 已出现可见闪烁风险，Phase 2 功率级应支持后续至少 2kHz 的 PWM 目标。
 
-## 3. Role Split
+## 3. 角色分工
 
-Project lead / PM reviewer:
+项目负责人 / PM 评审人：
 
-- Freeze requirements and stop scope drift.
-- Explain Phase 1 evidence and project boundaries to the intern.
-- Approve each gate before the intern moves to the next step.
-- Review schematic, BOM, placement, routing, and Gerber outputs using the checklists.
-- Run or supervise bring-up tests and record results.
+- 冻结需求，防止首板范围发散。
+- 给实习生讲清 Phase 1 已验证结果和项目边界。
+- 每个评审关卡通过后，才允许进入下一阶段。
+- 按检查清单评审原理图、BOM、PCB 放置、走线和 Gerber 文件。
+- 组织或监督样板上电测试，并记录结果。
 
-PCB engineer / intern:
+PCB 工程师 / 实习生：
 
-- Build the schematic and PCB according to this document and the T3-3S datasheet.
-- Maintain the pin map, BOM, issue list, and change log.
-- Export review artifacts before each gate.
-- Prepare manufacturing files after Gerber release approval.
-- Support sample soldering, inspection, and bring-up.
+- 按本文和 T3-3S 规格书完成原理图和 PCB。
+- 维护引脚分配表、BOM、问题清单和变更记录。
+- 每个评审节点前导出规定材料。
+- Gerber 发布后准备打样文件。
+- 配合样板焊接、目检和上电测试。
 
-## 4. Four-Week Schedule
+## 4. 四周排期
 
-| Time | Goal | PM review focus | Intern deliverables |
+| 时间 | 目标 | 负责人要评审什么 | 实习生交付物 |
 |---|---|---|---|
-| Week 1 Day 1 | Kickoff and requirement freeze | Explain Phase 1 facts, low-voltage boundary, no AC/48V/Zigbee for first board | Requirement note, system block diagram |
-| Week 1 Day 2-3 | Schematic v0.1 | Confirm T3-3S pins: `P24=WW PWM`, `P32=CW PWM`; expose `3V3/GND/TX1/RX1/CEN/P24/P32` test points | Schematic PDF, pin map table |
-| Week 1 Day 4-5 | Power, MOSFET, BOM review | Confirm 12/24V input, 3.3V Buck, logic-level N-MOSFETs, gate resistors, gate pulldowns, input protection | BOM v0.1, key datasheet links |
-| Week 2 Day 1-2 | Placement review | T3-3S antenna points outward; antenna area has no copper/traces; module is away from Buck inductor and LED current loops | Placement screenshot, 3D preview |
-| Week 2 Day 3-4 | Routing review | Check VIN/GND/LED current loops, MOSFET copper, reachable test points, readable silkscreen, DRC/ERC | PCB layout v0.9, DRC/ERC report |
-| Week 2 Day 5 | Gerber release gate | Approve only if schematic has no known hard error, antenna keep-out is correct, and connectors/silkscreen cannot be easily reversed | Gerber, BOM, pick/place, assembly drawing |
-| Week 3 | Board wait and lab prep | Prepare soldering tools, 12/24V safe supplies, meter, logic analyzer, inspection checklist | Soldering plan, power-up checklist |
-| Week 4 Day 1-2 | Assembly and visual inspection | No LED load yet; inspect polarity, shorts, module orientation, solder bridges | Assembled sample, inspection photos |
-| Week 4 Day 3 | Low-voltage power-up | Start with 12V current-limited input; measure VIN, 3V3, T3-3S current; then check UART/log | Power-up record |
-| Week 4 Day 4 | PWM and MOSFET test | Measure `P24/P32` unloaded PWM, then single-channel LED, then dual-channel CCT | Logic analyzer screenshots, LED video |
-| Week 4 Day 5 | 24V, thermal, and summary | Test 24V after 12V is stable; run 30 minutes and record temperatures | Phase 2 v0.1 bring-up report |
+| 第1周第1天 | 启动会 + 需求冻结 | 讲清 Phase 1 事实、低压边界、首板不做 220V/48V/Zigbee | 需求记录、系统框图 |
+| 第1周第2-3天 | 原理图 v0.1 | 确认 T3-3S 引脚：`P24=WW PWM`、`P32=CW PWM`；确认测试点 `3V3/GND/TX1/RX1/CEN/P24/P32` | 原理图 PDF、引脚分配表 |
+| 第1周第4-5天 | 电源、MOSFET、BOM 评审 | 确认 12/24V 输入、3.3V Buck、3.3V 可驱动的 N-MOSFET、栅极电阻、栅极下拉、输入保护 | BOM v0.1、关键器件规格书链接 |
+| 第2周第1-2天 | PCB 器件摆放评审 | T3-3S 天线朝外；天线区无覆铜无走线；模组远离 Buck 电感和 LED 大电流回路 | 器件摆放截图、3D 预览 |
+| 第2周第3-4天 | PCB 走线评审 | 检查 VIN/GND/LED 大电流回路、MOSFET 散热铜皮、测试点可触达、丝印清晰、DRC/ERC | PCB 走线 v0.9、设计规则/电气规则检查报告 |
+| 第2周第5天 | Gerber 发布前冻结 | 只批准三件事：原理图无硬伤、天线禁布区正确、接口和丝印不容易接反 | Gerber、BOM、贴片坐标、装配图 |
+| 第3周 | 等板 + 实验室准备 | 准备焊接工具、12/24V 安全电源、万用表、逻辑分析仪、上电检查清单 | 焊接计划、上电检查清单 |
+| 第4周第1-2天 | 样板焊接和目检 | 暂不上灯带；先查极性、短路、模组方向、焊桥 | 焊接样板、目检照片 |
+| 第4周第3天 | 低压上电 | 先用限流 12V 上电；测 VIN、3V3、T3-3S 电流；再看 UART/log | 上电记录 |
+| 第4周第4天 | PWM + MOSFET 测试 | 先空载测 `P24/P32`，再单路 LED，再双路 CCT | 逻辑分析仪截图、灯带视频 |
+| 第4周第5天 | 24V + 温升 + 总结 | 12V 稳定后再测 24V；连续运行 30 分钟并记录温度 | Phase 2 v0.1 上电测试报告 |
 
-## 5. Review Gates
+## 5. 阶段评审关卡
 
-Gate 1: requirement freeze
+评审关卡 1：需求冻结
 
-- First board is 12/24V low-voltage only.
-- T3-3S is the only Wi-Fi module target.
-- LED interface is `LED+ / WW- / CW-`.
-- PM and intern agree that connector orientation and silkscreen clarity matter more than board miniaturization.
+- 首板只做 12/24V 低压版本。
+- T3-3S 是唯一 Wi-Fi 模组目标。
+- LED 接口固定为 `LED+ / WW- / CW-`。
+- 项目负责人和实习生确认：首板可调试性、接口方向和丝印清晰度，比小尺寸更重要。
 
-Gate 2: schematic release to layout
+评审关卡 2：原理图通过，允许进入 PCB 布局走线
 
-- T3-3S recommended footprint is used.
-- `P24` and `P32` are reserved for WW/CW PWM.
-- UART/debug and reset-related test points are exposed.
-- Buck input/output capacitors and feedback components follow the selected Buck datasheet.
-- MOSFET gate series resistors and gate pulldowns are present.
-- No LED power current flows through the T3-3S ground path as a thin signal-only trace.
+- 使用 T3-3S 规格书推荐封装。
+- `P24` 和 `P32` 固定用于 WW/CW PWM。
+- UART、复位和关键电源/信号测试点已引出。
+- Buck 输入/输出电容、反馈电阻等按所选 Buck 规格书连接。
+- 每路 MOSFET 都有栅极串联电阻和栅极下拉电阻。
+- LED 大电流不能通过 T3-3S 附近的细信号地线返回。
 
-Gate 3: placement release to routing
+评审关卡 3：器件摆放通过，允许走线
 
-- T3-3S antenna is at a PCB edge and points away from large metal or high-current zones.
-- T3-3S antenna keep-out has no copper, traces, vias, or soldermask openings unless the datasheet explicitly requires them.
-- Buck, inductor, diode/switching node, and MOSFET current loops are compact and separated from the antenna.
-- Connectors are placed so wiring follows the real lamp harness direction.
+- T3-3S 放在 PCB 边缘，天线朝外，远离大金属和大电流区域。
+- T3-3S 天线禁布区没有覆铜、走线、过孔和不必要的开窗。
+- Buck、电感、开关节点和 MOSFET 大电流回路紧凑，并与天线区域拉开距离。
+- 接线端子位置符合真实灯具线束方向。
 
-Gate 4: Gerber release
+评审关卡 4：Gerber 发布
 
-- Schematic PDF, PCB top/bottom screenshots, 3D screenshot, BOM, DRC/ERC report, and issue log are all reviewed.
-- `VIN+`, `VIN-`, `LED+`, `WW-`, `CW-`, `3V3`, `GND`, `P24`, `P32`, `TX1`, `RX1`, and `CEN` labels are readable.
-- The board includes enough test access for first bring-up.
-- Known issues are either fixed or explicitly accepted in the issue log.
+- 原理图 PDF、PCB 正反面截图、3D 截图、BOM、DRC/ERC 报告和问题清单都已评审。
+- `VIN+`、`VIN-`、`LED+`、`WW-`、`CW-`、`3V3`、`GND`、`P24`、`P32`、`TX1`、`RX1`、`CEN` 标签清晰可读。
+- 首板保留足够测试点，方便第一次上电排查。
+- 已知问题已修复，或已在问题清单里明确接受风险。
 
-Gate 5: bring-up complete
+评审关卡 5：首板上电测试完成
 
-- 12V and 24V 3.3V output tests pass.
-- PWM is measurable on both channels.
-- WW/CW channels switch independently.
-- 30-minute thermal test is recorded.
-- Changes needed for v0.2 are listed.
+- 12V 和 24V 输入下，3.3V 测试通过。
+- 两路 PWM 都可测。
+- WW/CW 两路能独立开关 LED。
+- 30 分钟温升记录完成。
+- v0.2 需要修改的点已列清楚。
 
-## 6. Meeting Rhythm
+## 6. 同步节奏
 
-Daily 15-minute standup:
+每日 15 分钟站会：
 
 ```text
-Yesterday:
-Today:
-Blocked by:
-Decision needed from PM:
-Biggest technical risk today:
-Artifacts updated:
+昨天完成：
+今天计划：
+卡点：
+需要负责人决定：
+今天最大技术风险：
+已更新材料：
 ```
 
-Twice-weekly formal review:
+每周两次正式评审：
 
-- Mid-week: direction check and issue triage.
-- Friday: gate review and approval/rework decision.
+- 周中：看方向是否跑偏，集中处理问题。
+- 周五：做阶段评审，决定通过、返工或延期。
 
-Every formal review must use only these artifacts:
+每次正式评审只看四类材料：
 
-- Schematic PDF.
-- PCB screenshot or 3D view.
-- BOM table.
-- Issue/change log.
+- 原理图 PDF。
+- PCB 截图或 3D 图。
+- BOM 表。
+- 问题清单 / 变更记录。
 
-## 7. Required Discussion Topics With The Intern
+## 7. 必须和实习生讨论的细节
 
-Project boundary:
+项目边界：
 
-- This is a low-voltage smart middle-layer board.
-- The shipped product architecture is `220V AC -> certified constant-voltage supply -> smart low-voltage PCB -> LED`.
-- Bench supplies are lab tools only, not final product architecture.
+- 这是一块低压智能中间层 PCB。
+- 最终产品架构是 `220V AC -> 成品认证恒压电源 -> 智能低压 PCB -> LED`。
+- 实验室可调电源只是测试工具，不是最终产品的一部分。
 
-T3-3S footprint and layout:
+T3-3S 封装和 PCB 布局：
 
-- Use the datasheet recommended footprint.
-- Do not reuse WB3S mechanically or electrically.
-- Keep-out areas are not thermal pads and are not for routing.
-- The PCB antenna area must not be covered with copper or crossed by traces.
+- 按规格书的推荐封装（recommended footprint）建 PCB 封装。
+- 不要直接复用 WB3S 的机械封装或引脚定义。
+- 禁布区（keep-out）不是散热焊盘，也不能用来走线。
+- PCB 天线区域不能覆铜，也不能穿过走线。
 
-Pin map:
+Pin map：
 
-- `P24` -> WW PWM.
-- `P32` -> CW PWM.
-- `TX1/RX1` -> debug/UART access.
-- `CEN` -> reset/test access.
-- `3V3/GND/P24/P32/TX1/RX1/CEN` must be available as test points.
+- `P24` -> WW PWM。
+- `P32` -> CW PWM。
+- `TX1/RX1` -> 调试 / UART。
+- `CEN` -> 复位 / 测试。
+- `3V3/GND/P24/P32/TX1/RX1/CEN` 必须做成可测测试点。
 
-Power chain:
+电源链路：
 
-- VIN is 12/24V DC only for v0.1.
-- 3.3V must come from Buck, not a 24V-to-3.3V LDO.
-- 3.3V powers T3-3S and small-signal circuits only.
+- v0.1 的 VIN 只支持 12/24V DC。
+- 3.3V 必须由 Buck 提供，不用 LDO 从 24V 硬降到 3.3V。
+- 3.3V 只给 T3-3S 和小信号电路使用。
 
-MOSFET stage:
+MOSFET 功率级：
 
-- Low-side switching for WW and CW negative channels.
-- LED common positive remains on `LED+`.
-- Each gate needs a series resistor and a pulldown.
-- MOSFETs must be logic-level at 3.3V gate drive.
-- Copper and thermal area must match expected LED current.
+- WW 和 CW 都采用低边开关，也就是控制两路负极。
+- LED 公共正极保持在 `LED+`。
+- 每个 MOSFET 栅极都需要串联电阻和下拉电阻。
+- MOSFET 必须能被 3.3V 栅极电压可靠打开。
+- MOSFET 铜皮和散热面积要匹配预计 LED 电流。
 
-Debuggability:
+可调试性：
 
-- First board can be larger.
-- Test points and silkscreen are required.
-- Connector labels must be understandable by a non-PCB engineer.
+- 首板可以大一点。
+- 测试点和丝印必须保留。
+- 接线端子标签要让非 PCB 工程师也能看懂。
 
-## 8. Deliverable Naming
+## 8. 交付物命名
 
-Use these names so review artifacts do not become treasure maps:
+统一命名，避免后续找文件像寻宝：
 
 - `phase2_t3_3s_schematic_v0.1.pdf`
 - `phase2_t3_3s_pin_map_v0.1.xlsx`
@@ -219,3 +233,8 @@ Use these names so review artifacts do not become treasure maps:
 - `phase2_t3_3s_assembly_v0.1.pdf`
 - `phase2_t3_3s_bringup_report_v0.1.md`
 
+## 9. 翻译审核记录
+
+- 已将英文排期、角色、评审关卡和测试要求翻译为中文。
+- 技术名词保留英文缩写，并在阅读说明中解释，方便产品经理和 PCB 工程师对齐。
+- 已把“低压边界”“不做 220V/48V/Zigbee”“先好调再小型化”这些关键决策放在前半部分，降低误解风险。
