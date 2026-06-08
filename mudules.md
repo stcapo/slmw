@@ -2,7 +2,7 @@ Phase 2 目标：
 一套低压 DC 智能灯控中间层 PCB，优先覆盖 12V/24V 恒压灯带，支持 Wi-Fi/Zigbee 两个 BOM 版本。
 
 主控：
-Wi-Fi：T3-3S WB3S
+Wi-Fi：T3-3S
 
 核心电路：
 12/24V 输入保护
@@ -13,9 +13,9 @@ MOSFET gate 驱动/缓冲
 状态 LED
 UART/烧录/LA 测试点
 
-它们是“同类候选”，但不是完全并列、也不是随便互换。两者尺寸一样，都是 16mm × 24mm × 2.8mm 的 3S 类邮票孔模组，但芯片、引脚语义、PWM能力、内存、WiFi/BLE代际都不同。
+ T3-3S 是 16mm × 24mm × 2.8mm 的 3S 类邮票孔模组
 
-项目	WB3S	T3-3S	对我们影响
+项目	WB3S(次选) T3-3S 对我们影响
 芯片	BK7231T	Tuya T3	T3 更新
 主频	120MHz	320MHz	T3 余量大
 Flash	2MB	4MB	T3 更适合 TuyaOS/OTA
