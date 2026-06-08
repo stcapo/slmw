@@ -1,0 +1,5 @@
+Restore stock firmware if needed:
+
+ltchiptool flash write -b 115200 -d /dev/tty.usbserial-14110 -f bk72xxgen2 -s 0x0 ~/tuya/tuya-lighting/backup/nicemcu_bk7238_stock_latest.bin
+
+Run the command, then reset/CEN->GND when ltchiptool is trying to connect.

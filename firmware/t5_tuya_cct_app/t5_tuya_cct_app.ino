@@ -19,8 +19,8 @@
 const int P24_PIN = 24;
 const int P25_PIN = 25;
 
-const int WW_PIN = P25_PIN; // Keep the current swapped wiring.
-const int CW_PIN = P24_PIN; // Keep the current swapped wiring.
+const int WW_PIN = P24_PIN; // Keep the current swapped wiring.
+const int CW_PIN = P25_PIN; // Keep the current swapped wiring.
 
 const unsigned long PWM_PERIOD_US = 5000; // 200 Hz
 
@@ -93,12 +93,12 @@ void setWwCwPwm(int wwDuty, int cwDuty)
   wwDuty = clampPercent(wwDuty);
   cwDuty = clampPercent(cwDuty);
 
-  // Current swapped wiring: WW=P25, CW=P24.
+  // Current swapped wiring: WW=P24, CW=P25.
   setPinPwm(cwDuty, wwDuty);
 
-  Serial.print("Channel map: WW(P25)=");
+  Serial.print("Channel map: WW(P24)=");
   Serial.print(wwDuty);
-  Serial.print("%, CW(P24)=");
+  Serial.print("%, CW(P25)=");
   Serial.print(cwDuty);
   Serial.println("%");
 }
@@ -221,7 +221,7 @@ void setup()
 
   delay(500);
   Serial.println("T5AI-Core P24/P25 minimal LA PWM test start");
-  Serial.println("Mapping: LA CH0=P24, LA CH1=P25, WW=P25, CW=P24");
+  Serial.println("Mapping: LA CH0=P24, LA CH1=P25, WW=P24, CW=P25");
   printHelp();
   setPinPwm(0, 0);
 }
