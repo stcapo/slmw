@@ -139,13 +139,26 @@
 
 ---
 
-## 八、Phase 2 预留事项（暂不执行）
+## 八、Phase 2 当前计划（T3-3S 首板）
 
-- PCB 设计：根据 Phase 1 实测结果再选 T5-E1 / T3-3S 等裸模组
-- 宽压 Buck：XL7015E1 / 真正 12-48V 产品化 Buck，后移
-- Zigbee 方案：ZS3L / ZT3L，Phase 2 评估
-- 量产 MOSFET 功率级：高频版（≥2kHz），Phase 2 选型
-- 48V 宽压：全部后移
+> 2026-06-08 更新：Phase 2 Wi-Fi 主线已锁定为 T3-3S，首板按 4 周稳妥节奏推进，由项目负责人做 PM + 技术评审，新实习生 / PCB 工程师负责原理图、PCB Layout、BOM、打样文件和样板焊接配合。
+
+- 首板目标：`T3-3S + 12/24V 输入 + 3.3V Buck + 双路低边 MOSFET + 共阳双色温 LED 输出`。
+- 首板边界：低压控制 PCB，不做 220V 市电板载电源，不做 48V 宽压，不做 Zigbee，不追求极限小型化。
+- PWM 映射：`T3-3S P24 -> WW`，`T3-3S P32 -> CW`，并预留 `3V3/GND/TX1/RX1/CEN/P24/P32` 测试点。
+- PCB 重点：严格按 T3-3S datasheet 推荐封装建库；天线区不走线、不覆铜；keep-out 区域不上锡、不走线。
+- 验收标准：12V/24V 输入均能稳定输出 3.3V；两路 PWM 可测；WW/CW 可独立驱动；30 分钟运行无异常发热、异味、重启或电源异常。
+- 执行文档：
+  - `Phrase2/phase2_t3_3s_pcb_schedule.md`
+  - `Phrase2/phase2_t3_3s_pcb_review_checklists.md`
+  - `Phrase2/phase2_t3_3s_status_log.md`
+
+仍后移事项：
+
+- 48V 宽压版本。
+- Zigbee 版本。
+- 板载 AC-DC 市电方案。
+- 量产成本、认证、EMC、极限尺寸优化。
 
 ---
 
@@ -156,4 +169,7 @@
 | `Phase_1_实施手册.md` | 最权威的操作步骤，含所有实测记录 |
 | `采购现方案0521.md` | 最终下单清单，金额明细 |
 | `Agents.md` | 项目整体架构与三阶段计划 |
+| `Phrase2/phase2_t3_3s_pcb_schedule.md` | Phase 2 T3-3S PCB 4 周排期与协作计划 |
+| `Phrase2/phase2_t3_3s_pcb_review_checklists.md` | Phase 2 原理图、BOM、Layout、Gerber、Bring-up 检查清单 |
+| `Phrase2/phase2_t3_3s_status_log.md` | Phase 2 站会、评审、变更、问题和测试记录模板 |
 | T5AI-Core 官方文档 | https://www.tuyaopen.ai/zh/docs/hardware-specific/tuya-t5/t5-ai-core/overview-t5-ai-core |
